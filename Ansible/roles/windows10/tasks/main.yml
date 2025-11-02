@@ -1,0 +1,16 @@
+---
+- name: Installs IIS Web Service Optional Features
+  win_optional_feature:
+    name: 
+      - IIS-WebServerRole
+      - IIS-WebServer
+      - IIS-CGI
+    state: present
+
+- name: Reload WebAdministration module without reboot
+  win_shell: "Import-Module WebAdministration"
+
+- name: Download Visual C++ Redistributable
+  win_get_url:
+    url: "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+    dest: "C:\\vc_redist.x64.exe"

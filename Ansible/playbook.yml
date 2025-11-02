@@ -1,0 +1,18 @@
+---
+- name: Deploy Mirage Windows Server
+  hosts: windows_server
+  roles:
+    - windowsServer
+  tags:
+    - windows
+    - windowsServer
+    - never
+
+- name: Deploy Mirage Windows 10
+  hosts: windows10
+  roles:
+    - windows10
+  tags:
+    - windows
+    - windows10
+    - never
