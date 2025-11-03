@@ -13,13 +13,21 @@ Mirage is a Red Team operational toolkit for Windows environments that deploys a
 
 <pre>Mirage/
 ├── Ansible/
-│   ├── mirage_setup.yml
-│   ├── inventory.yml
+│   ├── inventory
+│   │   └── inventory.yml
+│   ├── roles
+│   │   ├── windows10
+│   │   │   └── tasks
+│   │   │       └── main.yml
+│   │   └── windowsServer
+│   │       └── tasks
+│   │           └── main.yml
+│   ├── playbook.yml
 │   └── ansible.cfg
 ├── Images/
-│   ├── UB_Lockdown/
+│   ├── UBLockdown/
 │   ├── IRSEC/
-│   └── Empire State Health/
+│   └── EmpireStateHealth/
 ├── PHP/
 │   ├── contact.php
 │   ├── search.php
@@ -32,8 +40,8 @@ Mirage is a Red Team operational toolkit for Windows environments that deploys a
 │   ├── Persistence.cpp
 │   └── IISManagerService.exe
 ├── Website/
-│   ├── UB_Lockdown/
-│   │   ├── UB_Lockdown.html
+│   ├── UBLockdown/
+│   │   ├── UBLockdown.html
 │   │   ├── button.js
 │   │   └── web.config
 │   ├── IRSEC/
@@ -41,7 +49,7 @@ Mirage is a Red Team operational toolkit for Windows environments that deploys a
 │   │   ├── button.js
 │   │   └── web.config
 │   └── Empire State Health/
-│       ├── Empire State Health.html
+│       ├── EmpireStateHealth.html
 │       ├── button.js
 │       └── web.config
 └── mirage.py
@@ -87,46 +95,32 @@ Edit the inventory.yml file to include your server's details:
 
 ```yaml
 all:
-  hosts:
-  children:
-    winserver:
-      hosts:
-        [IP_1]:
-        [IP_2]:
-        ...
-    win10:
-      hosts:
-        [IP_1]:
-        [IP_2]:
-        ...
   vars:
-    ansible_user: your_username
-    ansible_password: your_password
+    ansible_user: "" # REPLACE WITH USERNAME
+    ansible_password: "" # REPLACE WITH PASSWORD
     ansible_connection: winrm
     ansible_port: 5985
     ansible_winrm_transport: ntlm
     ansible_winrm_server_cert_validation: ignore
+    home_dir: "" # REPLACE WITH USER HOME DIRECTORY PATH
+    competition: "" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown)
+  children:
+    windowsServer:
+      hosts:
+        # REPLACE WITH WINDOWS SERVER IP ADDRESSES
+    windows10:
+      hosts:
+        # REPLACE WITH WINDOWS 10 IP ADDRESSES
 ```
 
-## 3. Configure Competition Name
-Edit the mirage_setup.yml file to include the name of the Competition:
-
-```yaml
- name: Mirage Server Configuration
-  hosts: all
-  gather_facts: true
-  vars:
-    Competition: "[Your Competition Name]"
-```
-
-## 4. Run the Ansible Playbook
+## 3. Run the Ansible Playbook
 To set up the IIS server and deploy the website, execute the following command:
 
 ```sh
-ansible-playbook -i inventory.yml mirage_setup.yml -f 50
+ansible-playbook playbook.yml --tags windows
 ```
 
-## 5. Remote Code Execution
+## 4. Using the Tool
 For remote command execution and reverse shell deployment, use the included `mirage.py` Python tool.
 
 ### Features
