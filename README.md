@@ -70,6 +70,7 @@ Mirage is a Red Team operational toolkit for Windows environments that deploys a
 - **Windows Server**: With WinRM running and enabled.
 - **Network Configuration**: Make sure the server is accessible and that required ports are properly configured.
 - **Required Packages**:
+
   ```sh
   sudo apt install git
   sudo apt install software-properties-common
