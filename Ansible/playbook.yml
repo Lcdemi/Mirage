@@ -1,6 +1,6 @@
 ---
 - name: Deploy Mirage Windows Server
-  hosts: windows_server
+  hosts: windowsServer
   roles:
     - windowsServer
   tags:
