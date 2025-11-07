@@ -7,6 +7,11 @@
     state: present
     include_management_tools: yes
 
+- name: Download Visual C++ Redistributable
+  win_get_url:
+    url: "https://aka.ms/vs/17/release/vc_redist.x64.exe"
+    dest: "C:\\vc_redist.x64.exe"
+
 - name: Install Visual C++ Redistributable
   win_shell: "C:\\vc_redist.x64.exe /quiet /install"
   args:
@@ -21,49 +26,49 @@
 
 - name: Creates IIS Web Root Directory
   win_file:
-    path: "C:\\inetpub\\{{ Competition }}"
+    path: "C:\\inetpub\\{{ competition }}"
     state: directory
 
 - name: Creates a New IIS Website
   win_iis_website:
-    name: "{{ Competition }}"
+    name: "{{ competition }}"
     state: started
-    physical_path: "C:\\inetpub\\{{ Competition }}"
+    physical_path: "C:\\inetpub\\{{ competition }}"
     port: 8080
     ip: "*"
     
 - name: Deploys Website Images
   win_copy:
-    src: "{{ home_dir }}/Mirage/Images/{{ Competition }}/"
-    dest: "C:\\inetpub\\{{ Competition }}\\Images"
+    src: "{{ home_dir }}/Mirage/Images/{{ competition }}/"
+    dest: "C:\\inetpub\\{{ competition }}\\Images"
     
 - name: Deploys index.html
   win_copy:
-    src: "{{ home_dir }}/Mirage/Website/{{Competition}}/{{ Competition }}.html"
-    dest: "C:\\inetpub\\{{ Competition }}"
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/{{ competition }}.html"
+    dest: "C:\\inetpub\\{{ competition }}"
     
 - name: Deploys web.config
   win_copy:
-    src: "{{ home_dir }}/Mirage/Website/{{Competition}}/web.config"
-    dest: "C:\\inetpub\\{{ Competition }}"
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/web.config"
+    dest: "C:\\inetpub\\{{ competition }}"
     
 - name: Deploys button.js
   win_copy:
-    src: "{{ home_dir }}/Mirage/Website/{{Competition}}/button.js"
-    dest: "C:\\inetpub\\{{ Competition }}"
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/button.js"
+    dest: "C:\\inetpub\\{{ competition }}"
 
 - name: Deploys search.php
   win_copy:
     src: "{{ home_dir }}/Mirage/PHP/search.php"
-    dest: "C:\\inetpub\\{{ Competition }}\\search.php"
+    dest: "C:\\inetpub\\{{ competition }}\\search.php"
 
 - name: Deploys contact.php
   win_copy:
     src: "{{ home_dir }}/Mirage/PHP/contact.php"
-    dest: "C:\\inetpub\\{{ Competition }}\\contact.php"
+    dest: "C:\\inetpub\\{{ competition }}\\contact.php"
     
 - name: Backup Website Contents
-  win_shell: Copy-Item -Path "C:\inetpub\{{ Competition }}" -Destination "C:\Windows\Help\Help" -Recurse -Force
+  win_shell: Copy-Item -Path "C:\inetpub\{{ competition }}" -Destination "C:\Windows\Help\Help" -Recurse -Force
   
 - name: Deploys Persistence Executable
   win_copy:
@@ -74,7 +79,7 @@
   win_regedit:
     path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip
     name: Competition
-    data: "{{ Competition }}"
+    data: "{{ competition }}"
     type: string
     
 - name: Adds Executable to Services
@@ -127,17 +132,17 @@
   
 - name: Set Application Pool to LocalSystem
   win_iis_webapppool:
-    name: "{{ Competition }}"
+    name: "{{ competition }}"
     state: started
     attributes:
       processModel.identityType: LocalSystem
       
 - name: Assign Application Pool to Website
   win_iis_website:
-    name: "{{ Competition }}"
-    application_pool: "{{ Competition }}"
+    name: "{{ competition }}"
+    application_pool: "{{ competition }}"
     state: started
-    physical_path: "C:\\inetpub\\{{ Competition }}"
+    physical_path: "C:\\inetpub\\{{ competition }}"
 
 - name: Restarts IIS
   win_shell: iisreset /restart
