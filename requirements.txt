@@ -1,0 +1,4 @@
+inquirerpy>=0.3
+rich>=13.0
+pyfiglet>=0.8
+requests>=2.32

