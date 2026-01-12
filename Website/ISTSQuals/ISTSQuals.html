@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISTS Quals Website</title>
+    <style>
+        body {
+            font-family: 'Verdana', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            line-height: 1.6;
+        }
+
+        section {
+            border-top: 1.5px solid #181859;
+            padding: 40px 20px;
+        }
+
+        /* Header styling */
+        header {
+            position: relative;
+            background-color: #181859;
+            background-image: url('Images/header.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(24, 24, 89, 0.7);
+        }
+
+        header h1 {
+            position: relative;
+            font-size: 3rem;
+            margin: 0;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Navigation */
+        nav {
+            background-color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        nav form {
+            flex: 1; /* This makes it take available space */
+            min-width: 0; /* Important for flex item shrinking */
+        }
+
+        nav input[type="text"] {
+            width: 100%; /* Takes full width of the form */
+            padding: 12px 20px;
+            border: 2px solid #e1e1e1;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+            /* Let the height be determined by padding + font size */
+        }
+
+        /* Logo container with fixed width but dynamic height */
+        .logo-container {
+            flex-shrink: 0; /* Prevents the logo from shrinking */
+            width: auto; /* Let the width be determined by the image aspect ratio */
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-container img {
+            height: 100%; /* Match the search bar height */
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        /* Main styling */
+        main {
+            padding: 60px 20px;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        main h2 {
+            font-size: 2.2rem;
+            color: #181859;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        main h2::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: #181859;
+            margin: 15px auto;
+        }
+        
+        main p {
+            font-size: 1.1rem;
+            color: #444;
+            margin: 0 auto 25px;
+            line-height: 1.7;
+            text-align: left;
+        }
+        
+        main button {
+            padding: 14px 35px;
+            background: linear-gradient(135deg, #181859, #4a90e2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        main button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(24, 24, 89, 0.3);
+        }
+
+        /* Mission Details Modal */
+        .mission-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #181859;
+            background: none;
+            border: none;
+        }
+
+        .close-modal:hover {
+            color: #e74c3c;
+        }
+
+        .modal-content h2 {
+            color: #181859;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .mission-objectives {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .mission-objectives li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        /* Competing Teams Section */
+        .teams {
+            text-align: center;
+        }
+        
+        .teams h2 {
+            font-size: 2.2rem;
+            color: #181859;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .teams h2::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: #181859;
+            margin: 15px auto;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .team-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #181859;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .team-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .team-item h3 {
+            margin: 0 0 10px 0;
+            color: #181859;
+            font-size: 1.2rem;
+        }
+        
+        .team-item p {
+            margin: 0;
+            color: #666;
+            font-style: italic;
+        }
+        
+        /* Team Type Styling */
+        .blue-team {
+            border-left: 4px solid #4a90e2;
+            background: linear-gradient(135deg, #ffffff, #f0f8ff);
+        }
+
+        .blue-team:hover {
+            background: linear-gradient(135deg, #ffffff, #e8f4ff);
+            border-left: 4px solid #357abd;
+        }
+
+        .red-team {
+            border-left: 4px solid #e74c3c;
+            background: linear-gradient(135deg, #ffffff, #ffeaea);
+        }
+
+        .red-team:hover {
+            background: linear-gradient(135deg, #ffffff, #ffdada);
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .white-team {
+            border-left: 4px solid #95a5a6;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        }
+
+        .white-team:hover {
+            background: linear-gradient(135deg, #ffffff, #e8f4f8);
+            border-left: 4px solid #7f8c8d;
+        }
+
+        .black-team {
+            border-left: 4px solid #2c3e50;
+            background: linear-gradient(135deg, #ffffff, #ecf0f1);
+        }
+
+        .black-team:hover {
+            background: linear-gradient(135deg, #ffffff, #dfe6e9);
+            border-left: 4px solid #34495e;
+        }
+
+        .team-role {
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Support Teams Grid */
+        .support-teams {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #e1e1e1;
+        }
+
+        .support-teams h3 {
+            color: #181859;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .support-item {
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .support-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .support-item h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .support-item p {
+            margin: 5px 0;
+            color: #333;
+        }
+
+        .support-item span {
+            display: block;
+            font-style: italic;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .support-desc {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* Sponsors Section */
+        .sponsors {
+            text-align: center;
+        }
+        
+        .sponsors h2 {
+            font-size: 2.2rem;
+            color: #181859;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .sponsors h2::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: #181859;
+            margin: 15px auto;
+        }
+        
+        .sponsor-tiers {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .sponsor-tier {
+            margin-bottom: 50px;
+        }
+        
+        .sponsor-tier h3 {
+            color: #181859;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+        
+        .sponsor-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .sponsor-logos img {
+            width: auto;
+            object-fit: contain;
+            filter: grayscale(100%);
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .sponsor-logos img:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        .diamond .sponsor-logos img {
+            height: 120px;
+            max-width: 300px;
+        }
+        
+        .platinum .sponsor-logos img {
+            height: 100px;
+            max-width: 250px;
+        }
+        
+        .gold .sponsor-logos img {
+            height: 80px;
+            max-width: 200px;
+        }
+        
+        .silver .sponsor-logos img {
+            height: 70px;
+            max-width: 180px;
+        }
+        
+        .educational .sponsor-logos img {
+            height: 60px;
+            max-width: 150px;
+        }
+
+        /* Contact Form */
+        .contact {
+            background: linear-gradient(135deg, #181859, #2a2a7a);
+            color: white;
+            text-align: center;
+        }
+        
+        .contact h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .contact h2::after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: white;
+            margin: 15px auto;
+        }
+        
+        .contact > p {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .contact form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .contact input, .contact textarea {
+            font-family: 'Verdana', sans-serif;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .contact textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .contact input[type="submit"] {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 16px;
+            margin-top: 15px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .contact input[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Footer styling */
+        footer {
+            background-color: #222;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        footer p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav form {
+                max-width: 100%;
+            }
+            
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .support-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            main h2, .teams h2, .sponsors h2, .contact h2 {
+                font-size: 1.8rem;
+            }
+            
+            .sponsor-logos {
+                gap: 20px;
+            }
+            
+            .diamond .sponsor-logos img {
+                height: 100px;
+                max-width: 250px;
+            }
+            
+            .platinum .sponsor-logos img {
+                height: 80px;
+                max-width: 200px;
+            }
+            
+            .gold .sponsor-logos img {
+                height: 70px;
+                max-width: 150px;
+            }
+            
+            .silver .sponsor-logos img {
+                height: 60px;
+                max-width: 120px;
+            }
+            
+            .educational .sponsor-logos img {
+                height: 50px;
+                max-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Your Mission Awaits, Agent</h1>
+    </header>    
+
+    <nav>
+        <form action="search.php" method="POST">
+            <input type="text" id="input_word" name="input_word" placeholder="Search here...">
+        </form>
+        <div class="logo-container">
+            <img src="Images\\logo.png" alt="ISTS Quals Logo">
+        </div>
+    </nav>
+
+    <main>
+        <h2>Mission Briefing</h2>
+        <p>
+            Agents of the Historical Timeline Taskforce & Protection (HTTP), your expertise is needed now more than ever.
+            Our intelligence division has detected dangerous alterations spreading across the timeline — history itself
+            is being rewritten in real time. These disruptions have been traced back to the clandestine group known as
+            the Hourglass Inversion.
+        </p>
+        <p>
+            As elite temporal security operatives, your mission is clear: respond immediately to incidents, reinforce 
+            mission-critical systems, and correct historical deviations as they occur. Every service you defend and every
+            report you complete is essential to restoring and maintaining timeline stability.
+        </p>
+        <p>
+            This organization has spent decades preparing for this exact moment. Now it is your turn to step into the
+            timestream and safeguard the past, present, and future.
+            <strong>We hold the line so the line continues on.</strong>
+        </p>
+        <button onclick="showMissionDetails()">Access Mission Details</button>
+    </main>
+
+    <!-- Mission Details Modal -->
+    <div id="missionModal" class="mission-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeMissionDetails()">&times;</button>
+            <h2>Mission Details - Operation Timeline Shield</h2>
+            <p><strong>Mission Code:</strong> HTTP-2026-ALPHA</p>
+            <p><strong>Clearance Level:</strong> OMEGA</p>
+            
+            <div class="mission-objectives">
+                <h3>Primary Objectives:</h3>
+                <ul>
+                    <li>Monitor and defend critical historical events from temporal alterations</li>
+                    <li>Maintain service uptime for all HTTP monitoring systems</li>
+                    <li>Complete assigned mission reports (injects) within specified timeframes</li>
+                    <li>Prevent Hourglass Inversion from achieving timeline dominance</li>
+                    <li>Submit Incident Response Report detailing field findings</li>
+                </ul>
+            </div>
+
+            <div class="mission-objectives">
+                <h3>Operational Parameters:</h3>
+                <ul>
+                    <li><strong>Duration:</strong> Competition timeframe</li>
+                    <li><strong>Status:</strong> ACTIVE</li>
+                    <li><strong>Threat Level:</strong> CRITICAL</li>
+                    <li><strong>Backup Protocols:</strong> ENABLED</li>
+                </ul>
+            </div>
+
+            <p><strong>Remember Agents:</strong> Every second counts. The timeline depends on your vigilance and expertise.</p>
+        </div>
+    </div>
+
+    <!-- Competing Teams Section -->
+    <section class="teams">
+        <h2>Operational Divisions</h2>
+        <div class="team-grid">
+            <!-- Blue Teams - Field Agents -->
+            <div class="team-item blue-team">
+                <h3>Team 1</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Timeline Restoration Unit</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 2</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Anomaly Neutralization</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 3</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Historical Forensics</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 4</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Ancient Era Protection</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 5</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Future Timeline Security</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 6</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Critical Event Defense</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 7</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Temporal Stability</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 8</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Mobile Response Unit</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 9</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Multiverse Monitoring</span>
+            </div>
+
+            <!-- Additional Blue Teams -->
+            <div class="team-item blue-team">
+                <h3>Team 10</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Archive Security</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 11</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Rapid Deployment</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 12</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Ripple Effect Analysis</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 13</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Offensive Operations</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 14</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Era-Specific Protection</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 15</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Precision Corrections</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 16</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Information Gathering</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 17</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Timeline Reconstruction</span>
+            </div>
+            <div class="team-item blue-team">
+                <h3>Team 18</h3>
+                <p>Division: BLUE TEAM | Field Operations</p>
+                <span class="team-role">Last Line of Defense</span>
+            </div>
+        </div>
+
+        <!-- Support Teams Section -->
+        <div class="support-teams">
+            <h3>Support & Command Structure</h3>
+            <div class="support-grid">
+                <div class="support-item red-team">
+                    <h4>RED TEAM</h4>
+                    <p>Hourglass Inversion</p>
+                    <span>"Sands fall where we decide"</span>
+                    <p class="support-desc">Timeline adversaries attempting to alter historical events</p>
+                </div>
+                <div class="support-item white-team">
+                    <h4>WHITE TEAM</h4>
+                    <p>HTTP Analysts</p>
+                    <span>Mission Support & Analysis</span>
+                    <p class="support-desc">Facilitate communication, assist with mission support, and analyze reports</p>
+                </div>
+                <div class="support-item black-team">
+                    <h4>BLACK TEAM</h4>
+                    <p>HTTP Leadership</p>
+                    <span>Command & Oversight</span>
+                    <p class="support-desc">Event organizers and higher-ups providing critical support and oversight</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sponsors Section -->
+    <section class="sponsors">
+        <h2>Our Sponsors</h2>
+        <div class="sponsor-tiers">
+            <div class="sponsor-tier diamond">
+                <h3>Diamond Sponsors</h3>
+                <div class="sponsor-logos">
+                    <img src="Images\\sponsor_diamond1.png" alt="Diamond Sponsor 1">
+                    <img src="Images\\sponsor_diamond2.png" alt="Diamond Sponsor 2">
+                </div>
+            </div>
+            <div class="sponsor-tier platinum">
+                <h3>Platinum Sponsors</h3>
+                <div class="sponsor-logos">
+                    <img src="Images\\sponsor_platinum1.png" alt="Platinum Sponsor 1">
+                    <img src="Images\\sponsor_platinum2.png" alt="Platinum Sponsor 2">
+                    <img src="Images\\sponsor_platinum3.png" alt="Platinum Sponsor 3">
+                    <img src="Images\\sponsor_platinum4.png" alt="Platinum Sponsor 4">
+                    <img src="Images\\sponsor_platinum5.png" alt="Platinum Sponsor 5">
+                </div>
+            </div>
+            <div class="sponsor-tier gold">
+                <h3>Gold Sponsors</h3>
+                <div class="sponsor-logos">
+                    <img src="Images\\sponsor_gold1.png" alt="Gold Sponsor 1">
+                    <img src="Images\\sponsor_gold2.png" alt="Gold Sponsor 2">
+                    <img src="Images\\sponsor_gold3.png" alt="Gold Sponsor 3">
+                    <img src="Images\\sponsor_gold4.png" alt="Gold Sponsor 4">
+                    <img src="Images\\sponsor_gold5.png" alt="Gold Sponsor 5">
+                    <img src="Images\\sponsor_gold6.png" alt="Gold Sponsor 6">
+                </div>
+            </div>
+            <div class="sponsor-tier silver">
+                <h3>Silver Sponsors</h3>
+                <div class="sponsor-logos">
+                    <img src="Images\\sponsor_silver1.png" alt="Silver Sponsor 1">
+                    <img src="Images\\sponsor_silver2.png" alt="Silver Sponsor 2">
+                    <img src="Images\\sponsor_silver3.png" alt="Silver Sponsor 3">
+                    <img src="Images\\sponsor_silver4.png" alt="Silver Sponsor 4">
+                </div>
+            </div>
+            <div class="sponsor-tier educational">
+                <h3>Educational Sponsors</h3>
+                <div class="sponsor-logos">
+                    <img src="Images\\sponsor_edu1.png" alt="Educational Sponsor 1">
+                    <img src="Images\\sponsor_edu2.png" alt="Educational Sponsor 2">
+                    <img src="Images\\sponsor_edu3.png" alt="Educational Sponsor 3">
+                    <img src="Images\\sponsor_edu4.png" alt="Educational Sponsor 4">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form -->
+    <section class="contact">
+        <h2>Contact Us Directly</h2>
+        <p>If you have any questions or feedback, we'd love to hear from you!</p>
+        <form action="contact.php" method="POST">
+            <textarea name="input_word" placeholder="Your Message" rows="5" required></textarea>
+            <input type="submit" value="Send Message">
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2025 All Rights Reserved. Crafted with ❤️ by Big Booty Inc.</p>
+    </footer>
+
+    <script> 
+        function showMissionDetails() { 
+            document.getElementById('missionModal').style.display = 'flex';
+        }
+
+        function closeMissionDetails() {
+            document.getElementById('missionModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside the content
+        window.onclick = function(event) {
+            const modal = document.getElementById('missionModal');
+            if (event.target === modal) {
+                closeMissionDetails();
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMissionDetails();
+            }
+        });
+    </script> 
+</body> 
+</html>
+
+
