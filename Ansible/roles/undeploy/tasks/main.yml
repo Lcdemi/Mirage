@@ -1,0 +1,75 @@
+---
+- name: Stop and Remove Custom Persistence Service
+  block:
+    - name: Stop webmgrsvc service
+      win_service:
+        name: "webmgrsvc"
+        state: stopped
+      ignore_errors: yes
+
+    - name: Delete webmgrsvc service
+      win_shell: |
+        $service = Get-Service -Name "webmgrsvc" -ErrorAction SilentlyContinue
+        if ($service) {
+          sc.exe delete "webmgrsvc"
+        }
+      ignore_errors: yes
+
+- name: Remove Persistence Executable and Registry Key
+  block:
+    - name: Remove IISManagerService.exe
+      win_file:
+        path: "C:\\Windows\\System32\\IISManagerService.exe"
+        state: absent
+
+    - name: Remove Competition Registry Key
+      win_regedit:
+        path: HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip
+        name: Competition
+        state: absent
+
+- name: Remove IIS Website and Application Pool
+  block:
+    - name: Stop and Remove IIS Website
+      win_iis_website:
+        name: "{{ competition }}"
+        state: absent
+
+    - name: Remove IIS Application Pool
+      win_iis_webapppool:
+        name: "{{ competition }}"
+        state: absent
+
+- name: Clean up Web Content and Backups
+  block:
+    - name: Remove Web Root Directory
+      win_file:
+        path: "C:\\inetpub\\{{ competition }}"
+        state: absent
+
+    - name: Remove Hidden Web Backup
+      win_file:
+        path: "C:\\Windows\\Help\\Help"
+        state: absent
+
+- name: Remove PHP Installation and PHP Backups
+  block:
+    - name: Remove PHP Program Files
+      win_file:
+        path: "C:\\Program Files\\PHP"
+        state: absent
+
+    - name: Remove Hidden PHP Backup
+      win_file:
+        path: "C:\\ProgramData\\Microsoft\\PHP"
+        state: absent
+
+- name: Remove Custom Firewall Rule
+  win_shell: |
+    $rule = Get-NetFirewallRule -DisplayName 'Core Networking - IPHTTP (TCP-In)' -ErrorAction SilentlyContinue
+    if ($rule) {
+        Remove-NetFirewallRule -DisplayName 'Core Networking - IPHTTP (TCP-In)'
+    }
+
+- name: Restart IIS to apply changes
+  win_shell: iisreset /restart
