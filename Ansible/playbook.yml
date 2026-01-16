@@ -16,3 +16,11 @@
     - windows
     - windows10
     - never
+
+- name: Undeploy Mirage
+  hosts: windowsServer, windows10
+  roles:
+    - undeploy
+  tags:
+    - undeploy
+    - never
