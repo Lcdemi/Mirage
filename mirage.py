@@ -23,40 +23,25 @@ from InquirerPy.utils import get_style
 # Disable HTTPS Warnings for Pwnboard
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-ALL_HOSTS = [
-    "192.168.1.3",
-    "192.168.1.4",
-    "192.168.1.6",
-    # All Hosts
-]
+# Range for x is 1 to 13 inclusive
+x_range = range(1, 14)
 
-ALL_DC = [
-    # Domain Controllers - typically the ??? addresses
-]
+ALL_DC = [f"10.{x}.1.1" for x in x_range]
+ALL_WINRM = [f"10.{x}.1.2" for x in x_range]
+ALL_ICMP = [f"10.{x}.1.3" for x in x_range]
+ALL_SMB = [f"192.168.{x}.3" for x in x_range]
+ALL_IIS = [f"192.168.{x}.4" for x in x_range]
 
-ALL_SMB = [
-    # SMB Hosts - typically the ??? addresses
-]
-
-ALL_IIS = [
-    # IIS Hosts - typically the ??? addresses
-]
-
-ALL_WINRM = [
-    # WinRM Hosts - typically the ??? addresses
-]
-
-ALL_ICMP = [
-    # ICMP Hosts - typically the ??? addresses
-]
+# Combine all lists into one master host list
+ALL_HOSTS = ALL_DC + ALL_WINRM + ALL_ICMP + ALL_SMB + ALL_IIS
 
 PORT = 8080
 TIMEOUT = 30
 CONCURRENCY = 8
 THROTTLE_MS = 50
 PWNBOARD_URL = "https://www.pwnboard.win/pwn"
-AUTH_TOKEN = "Bearer YOUR_PWNBOARD_AUTH_TOKEN_HERE"  # Replace with your actual token
-WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_URL_HERE"  # Replace with your actual webhook URL
+AUTH_TOKEN = "Bearer AUTH_TOKEN_HERE"  # Replace with your actual token
+WEBHOOK_URL = "https://discord.com/api/webhooks/1458274465229177029/GVQYXo9Ag06A_LmndNouuC1buai6kJiXQhwcxSROHcKmC4gncZ9wXejalP96kqhqnFiz"  # Replace with your actual webhook URL
 
 # Callback Global Variables
 unprivileged_results = []
