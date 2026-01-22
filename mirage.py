@@ -896,10 +896,11 @@ def display_results(results, action_type):
             console.print(f"\n{double_line}")
             console.print("[bold #00ff00]📊 FINAL SUMMARY[/bold #00ff00]")
             console.print(f"{double_line}")
-            console.print(f"[#00ff00]✅ Successful: {success_count} targets[/#00ff00]")
-            console.print(f"[#ffff00]⚠️ Warnings:   {warning_count} targets[/#ffff00]")
-            console.print(f"[#ff0000]❌ Failed:     {error_count} targets[/#ff0000]")
-            console.print(f"[bold white]📋 Total:      {len(sorted_results)} targets[/bold white]")
+            console.print(f"[#00ff00]✅ Successful:    {success_count} targets[/#00ff00]")
+            console.print(f"[#ffff00]⚠️ Warnings:      {warning_count} targets[/#ffff00]")
+            console.print(f"[#ff0000]❌ Failed:        {error_count} targets[/#ff0000]")
+            console.print(f"[bold white]📋 Total:         {len(sorted_results)} targets[/bold white]")
+            console.print(f"[bold white]📈 Success Rate:  {(success_count/len(sorted_results))*100:.2f}%[/bold white]")
             console.print(f"{double_line}")
 
     print()
@@ -1030,7 +1031,6 @@ def singular_execution():
 def mass_execution(command=None, callback=False, targets=None):
     if targets == None:
         targets = choose_targets()
-    print(targets)
     if not targets:
         print("No targets selected")
         return
