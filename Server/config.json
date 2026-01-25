@@ -1,0 +1,30 @@
+{
+    "hosts": {
+        "range_start": 1,
+        "range_end": 13,
+        "patterns": {
+            "ALL_CA": null,
+            "ALL_DC": "10.{x}.1.1",
+            "ALL_ICMP": "10.{x}.1.3",
+            "ALL_IIS": "192.168.{x}.4",
+            "ALL_FTP": null,
+            "ALL_MSSQL": null,
+            "ALL_RDP": null,
+            "ALL_SMB": "192.168.{x}.3",
+            "ALL_SSH": null,
+            "ALL_WINRM": "10.{x}.1.2"
+        }
+    },
+    "logging": {
+        "PWNBOARD_URL": "https://www.pwnboard.win/pwn",
+        "PWNBOARD_AUTH_TOKEN": "Bearer AUTH_TOKEN_HERE",
+        "DISCORD_WEBHOOK_URL": "https://discord.com/api/webhooks/FULL_WEBHOOK_HERE"
+    },
+    "other": {
+        "PORT": 8080,
+        "TIMEOUT": 30,
+        "CONCURRENCY": 8,
+        "THROTTLE_MS": 50,
+        "TIMEZONE": "EST"
+    }
+}
