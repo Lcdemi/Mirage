@@ -5,9 +5,9 @@
         "patterns": {
             "ALL_CA": null,
             "ALL_DC": "10.{x}.1.1",
+            "ALL_FTP": null,
             "ALL_ICMP": "10.{x}.1.3",
             "ALL_IIS": "192.168.{x}.4",
-            "ALL_FTP": null,
             "ALL_MSSQL": null,
             "ALL_RDP": null,
             "ALL_SMB": "192.168.{x}.3",

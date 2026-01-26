@@ -40,20 +40,35 @@ def main_interface():
     return action
     
 def choose_targets():
+    groups = [
+        ("ALL_HOSTS", "All Hosts", CONFIG.hosts.ALL_HOSTS),
+        ("ALL_CA", "All Certificate Authorities", CONFIG.hosts.ALL_CA),
+        ("ALL_DC", "All Domain Controllers", CONFIG.hosts.ALL_DC),
+        ("ALL_FTP", "All FTP Hosts", CONFIG.hosts.ALL_FTP),
+        ("ALL_ICMP", "All ICMP Hosts", CONFIG.hosts.ALL_ICMP),
+        ("ALL_IIS", "All IIS Hosts", CONFIG.hosts.ALL_IIS),
+        ("ALL_MSSQL", "All MSSQL Hosts", CONFIG.hosts.ALL_MSSQL),
+        ("ALL_RDP", "All RDP Hosts", CONFIG.hosts.ALL_RDP),
+        ("ALL_SMB", "All SMB Hosts", CONFIG.hosts.ALL_SMB),
+        ("ALL_SSH", "All SSH Hosts", CONFIG.hosts.ALL_SSH),
+        ("ALL_WINRM", "All WinRM Hosts", CONFIG.hosts.ALL_WINRM),
+    ]
+
+    dynamic_choices = [
+        Choice(value=key, name=label)
+        for key, label, values in groups
+        if values  # only include non-empty groups
+    ]
+
+    # Always offer custom and cancel
+    dynamic_choices.append(Choice(value="CUSTOM", name="Custom (Enter Comma-Separated List)"))
+    dynamic_choices.append(Choice(value=None, name="Cancel"))
+
     choice = inquirer.select(
         message="Which group would you like to target?",
-        choices=[
-            Choice(value="ALL_HOSTS", name="All Hosts"),
-            Choice(value="ALL_DC", name="All Domain Controllers"),
-            Choice(value="ALL_IIS", name="All IIS Hosts"),
-            Choice(value="ALL_WINRM", name="All WinRM Hosts"),
-            Choice(value="ALL_ICMP", name="All ICMP Hosts"),
-            Choice(value="ALL_SMB", name="All SMB Hosts"),
-            Choice(value="CUSTOM", name="Custom (Enter Comma-Separated List)"),
-            Choice(value=None, name="Cancel"),
-        ],
+        choices=dynamic_choices,
         style=matrix_style,
-        pointer=">>",
+        pointer=">",
         instruction="(Use ↑↓ arrows, Enter to select)"
     ).execute()
     
@@ -88,11 +103,16 @@ def choose_targets():
 
     mapping = {
         "ALL_HOSTS": CONFIG.hosts.ALL_HOSTS,
+        "ALL_CA": CONFIG.hosts.ALL_CA,
         "ALL_DC": CONFIG.hosts.ALL_DC,
-        "ALL_IIS": CONFIG.hosts.ALL_IIS,
-        "ALL_WINRM": CONFIG.hosts.ALL_WINRM,
+        "ALL_FTP": CONFIG.hosts.ALL_FTP,
         "ALL_ICMP": CONFIG.hosts.ALL_ICMP,
+        "ALL_IIS": CONFIG.hosts.ALL_IIS,
+        "ALL_MSSQL": CONFIG.hosts.ALL_MSSQL,
+        "ALL_RDP": CONFIG.hosts.ALL_RDP,
         "ALL_SMB": CONFIG.hosts.ALL_SMB,
+        "ALL_SSH": CONFIG.hosts.ALL_SSH,
+        "ALL_WINRM": CONFIG.hosts.ALL_WINRM,
     }
     return mapping.get(choice, [])
 
