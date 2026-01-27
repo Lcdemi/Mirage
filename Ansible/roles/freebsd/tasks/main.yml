@@ -1,0 +1,103 @@
+---
+- name: Install Nginx and Required Packages (pfSense/FreeBSD)
+  shell: "pkg install -y nginx"
+  register: pkg_res
+  # This prevents Ansible from marking "changed" if the package was already there
+  changed_when: "'extracting' in pkg_res.stdout.lower() or 'installing' in pkg_res.stdout.lower()"
+  failed_when: 
+    - pkg_res.rc != 0 
+    - "'Already installed' not in pkg_res.stdout"
+
+- name: Create the Nginx config directory (if missing)
+  file:
+    path: /usr/local/etc/nginx/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Creates Web Root Directory
+  file:
+    path: "/usr/local/www/{{ competition }}"
+    state: directory
+    mode: '0755'
+
+- name: Deploys Website Images
+  copy:
+    src: "{{ home_dir }}/Mirage/Images/{{ competition }}/"
+    dest: "/usr/local/www/{{ competition }}/Images"
+    
+- name: Deploys index.html
+  copy:
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/{{ competition }}.html"
+    dest: "/usr/local/www/{{ competition }}/index.html"
+    
+- name: Deploys button.js
+  copy:
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/button.js"
+    dest: "/usr/local/www/{{ competition }}/button.js"
+
+- name: Deploys search.php
+  copy:
+    src: "{{ home_dir }}/Mirage/PHP/search.php"
+    dest: "/usr/local/www/{{ competition }}/search.php"
+
+- name: Deploys contact.php
+  copy:
+    src: "{{ home_dir }}/Mirage/PHP/contact.php"
+    dest: "/usr/local/www/{{ competition }}/contact.php"
+
+- name: Configure Isolated Nginx (Port 8080)
+  copy:
+    dest: "/usr/local/etc/nginx/nginx.conf"
+    content: |
+      user root wheel;
+      worker_processes 1;
+      events { worker_connections 1024; }
+      http {
+          include       mime.types;
+          default_type  application/octet-stream;
+          server {
+              listen 8080;
+              server_name localhost;
+              root /usr/local/www/{{ competition }};
+              index index.html;
+
+              # Pass PHP scripts to pfSense's existing PHP-FPM socket
+              location ~ \.php$ {
+                  try_files $uri =404;
+                  fastcgi_pass unix:/var/run/php-fpm.socket;
+                  fastcgi_index index.php;
+                  include fastcgi_params;
+                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+              }
+          }
+      }
+
+- name: Allow Port 8080 using PFSense Rule (WAN)
+  pfsensible.core.pfsense_rule:
+    name: "Allow Competition Website"
+    action: pass
+    interface: wan
+    ipprotocol: inet
+    protocol: tcp
+    source: any
+    destination: any
+    destination_port: 8080
+    state: present
+
+- name: Allow Port 8080 using PFSense Rule (LAN)
+  pfsensible.core.pfsense_rule:
+    name: "Allow Competition Website"
+    action: pass
+    interface: lan
+    ipprotocol: inet
+    protocol: tcp
+    source: any
+    destination: any
+    destination_port: 8080
+    state: present
+
+- name: Ensure Nginx is enabled on boot and Restarted
+  shell: |
+    sysrc nginx_enable=YES
+    service nginx enable
+    service nginx restart

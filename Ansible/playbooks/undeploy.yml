@@ -19,13 +19,24 @@
     - windows10
     - never
 
-- name: Undeploy Mirage Ubuntu
-  hosts: ubuntu
-  become: yes
-  roles:
-    - undeploy
-  tags:
-    - undeploy
-    - linux
-    - ubuntu
-    - never
+# ISNT IMPLEMENTED YET
+# - name: Undeploy Mirage Linux
+#   hosts: linux
+#   become: yes
+#   roles:
+#     - undeploy
+#   tags:
+#     - undeploy
+#     - linux
+#     - never
+
+# - name: Undeploy Mirage FreeBSD
+#   hosts: freebsd
+#   become: yes
+#   roles:
+#     - undeploy
+#   tags:
+#     - undeploy
+#     - freebsd
+#     - pfsense
+#     - never

@@ -28,3 +28,14 @@
     - deploy
     - linux
     - never
+
+- name: Deploy Mirage FreeBSD/pfSense
+  hosts: freebsd
+  become: yes
+  roles:
+    - freebsd
+  tags:
+    - deploy
+    - freebsd
+    - pfsense
+    - never
