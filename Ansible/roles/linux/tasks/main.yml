@@ -1,0 +1,150 @@
+---
+- name: Install Apache and Required Packages (Debian/Ubuntu)
+  apt:
+    name:
+      - apache2
+      - php
+      - libapache2-mod-php
+    state: present
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Install Apache and Required Packages (RedHat/CentOS/Fedora)
+  yum:
+    name:
+      - httpd
+      - php
+    state: present
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum'
+
+- name: Install Apache and Required Packages (Arch Linux)
+  pacman:
+    name:
+      - apache
+      - php
+      - php-apache
+    state: present
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Creates Apache Web Root Directory (Debian/Ubuntu)
+  file:
+    path: /var/www/{{ competition }}
+    state: directory
+    mode: '0755'
+    owner: www-data
+    group: www-data
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Creates Apache Web Root Directory (RedHat/CentOS/Fedora/Arch)
+  file:
+    path: /var/www/{{ competition }}
+    state: directory
+    mode: '0755'
+    owner: apache
+    group: apache
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Deploys Website Images
+  copy:
+    src: "{{ home_dir }}/Mirage/Images/{{ competition }}/"
+    dest: "/var/www/{{ competition }}/Images"
+    
+- name: Deploys index.html
+  copy:
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/{{ competition }}.html"
+    dest: "/var/www/{{ competition }}/index.html"
+    
+- name: Deploys button.js
+  copy:
+    src: "{{ home_dir }}/Mirage/Website/{{ competition }}/button.js"
+    dest: "/var/www/{{ competition }}/button.js"
+
+- name: Deploys search.php
+  copy:
+    src: "{{ home_dir }}/Mirage/PHP/search.php"
+    dest: "/var/www/{{ competition }}/search.php"
+
+- name: Deploys contact.php
+  copy:
+    src: "{{ home_dir }}/Mirage/PHP/contact.php"
+    dest: "/var/www/{{ competition }}/contact.php"
+
+- name: Allow Port 8080 through UFW (Debian/Ubuntu)
+  ufw:
+    rule: allow
+    port: 8080
+    proto: tcp
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Allow Port 8080 through firewalld (RedHat/CentOS/Fedora)
+  firewalld:
+    port: 8080/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum'
+
+- name: Allow Port 8080 through firewalld (Arch Linux)
+  firewalld:
+    port: 8080/tcp
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when: ansible_facts['pkg_mgr'] == 'pacman'
+  ignore_errors: yes
+
+- name: Append to Ports.conf to Listen on Port 8080 (Debian/Ubuntu)
+  lineinfile:
+    path: /etc/apache2/ports.conf
+    insertafter: '^Listen 80'
+    line: 'Listen 8080'
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Configure httpd to Listen on Port 8080 (RedHat/CentOS/Fedora/Arch)
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    insertafter: '^Listen 80'
+    line: 'Listen 8080'
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Add Virtual Host Configuration for Port 8080 (Debian/Ubuntu)
+  copy:
+    dest: /etc/apache2/sites-available/000-default.conf
+    content: |
+      <VirtualHost *:8080>
+          ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/{{ competition }}
+          ErrorLog ${APACHE_LOG_DIR}/error.log
+          CustomLog ${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Add Virtual Host Configuration for Port 8080 (RedHat/CentOS/Fedora/Arch)
+  copy:
+    dest: /etc/httpd/conf.d/{{ competition }}.conf
+    content: |
+      <VirtualHost *:8080>
+          ServerAdmin webmaster@localhost
+          DocumentRoot /var/www/{{ competition }}
+          ErrorLog /var/log/httpd/error.log
+          CustomLog /var/log/httpd/access.log combined
+      </VirtualHost>
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Enable and Restart Apache Service (Debian/Ubuntu)
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Enable and Restart Apache Service (RedHat/CentOS/Fedora/Arch)
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'

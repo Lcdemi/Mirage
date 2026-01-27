@@ -4,6 +4,7 @@
   roles:
     - windowsServer
   tags:
+    - deploy
     - windows
     - windowsServer
     - never
@@ -13,14 +14,17 @@
   roles:
     - windows10
   tags:
+    - deploy
     - windows
     - windows10
     - never
 
-- name: Undeploy Mirage
-  hosts: windowsServer, windows10
+- name: Deploy Mirage Linux
+  hosts: linux
+  become: yes
   roles:
-    - undeploy
+    - linux
   tags:
-    - undeploy
+    - deploy
+    - linux
     - never

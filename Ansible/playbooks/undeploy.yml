@@ -1,0 +1,31 @@
+---
+- name: Undeploy Mirage Windows Server
+  hosts: windowsServer
+  roles:
+    - undeploy
+  tags:
+    - undeploy
+    - windows
+    - windowsServer
+    - never
+
+- name: Undeploy Mirage Windows 10
+  hosts: windows10
+  roles:
+    - undeploy
+  tags:
+    - undeploy
+    - windows
+    - windows10
+    - never
+
+- name: Undeploy Mirage Ubuntu
+  hosts: ubuntu
+  become: yes
+  roles:
+    - undeploy
+  tags:
+    - undeploy
+    - linux
+    - ubuntu
+    - never

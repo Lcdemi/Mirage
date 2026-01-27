@@ -1,42 +1,32 @@
 all:
   vars:
-    ansible_user: "fathertime" # REPLACE WITH USERNAME
-    ansible_password: "Change.me123!" # REPLACE WITH PASSWORD
-    ansible_connection: winrm
-    ansible_port: 5985
-    ansible_winrm_transport: ntlm
-    ansible_winrm_server_cert_validation: ignore
     home_dir: "/home/ubuntu" # REPLACE WITH USER HOME DIRECTORY PATH
-    competition: "ISTSQuals" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown)
+    competition: "ISTSQuals" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown, ISTSQuals)
   children:
-    windowsServer:
+    windows:
+      vars:
+        ansible_user: "fathertime" # REPLACE WITH USERNAME
+        ansible_password: "Change.me123!" # REPLACE WITH PASSWORD
+        ansible_connection: winrm
+        ansible_port: 5985
+        ansible_winrm_transport: ntlm
+        ansible_winrm_server_cert_validation: ignore
+      children:
+        windowsServer:
+          hosts:
+            192.168.1.1:
+            192.168.1.2:
+            192.168.1.3:
+        windows10:
+          hosts:
+            192.168.1.6:
+    linux:
+      vars:
+        ansible_user: "ubuntu" # REPLACE WITH USERNAME
+        ansible_password: "ubuntu" # REPLACE WITH PASSWORD
+        ansible_become_password: "ubuntu" # REPLACE WITH PASSWORD
+        ansible_become_method: sudo
+        ansible_connection: ssh
+        ansible_port: 22
       hosts:
-        #10.1.1.1:
-        #192.168.4.3:
-        #10.5.1.1:
-        #192.168.5.3:
-        10.6.1.1:
-        #192.168.8.3:
-        #192.168.10.3:
-        10.11.1.1:
-        #10.2.1.1:
-        #192.168.[1:13].3:
-        #10.[1:13].1.1:
-        #192.168.14.3:
-        #10.14.1.1:
-    windows10:
-      hosts:
-        #10.2.1.2:
-        #10.6.1.3:
-        #192.168.13.4:
-        #10.12.1.2:
-        #10.5.1.3:
-        #10.11.1.3:
-        #10.1.1.2:
-        #10.7.1.2:
-        #192.168.[1:13].4:
-        #10.[1:13].1.2:
-        #10.[1:13].1.3:
-        #192.168.14.4:
-        #10.14.1.2:
-        #10.14.1.3:
+        192.168.1.7:
