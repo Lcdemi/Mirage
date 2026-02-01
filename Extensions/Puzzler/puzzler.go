@@ -52,7 +52,7 @@ func listen() {
 		switch char {
 		case 'p', 'P', 'u', 'U', 'z', 'Z', 'l', 'L', 'e', 'E', 'r', 'R':
 			rotationValue += 90
-			fmt.Printf("%c key pressed - executing display.exe to rotate screen\n", char)
+			fmt.Printf("%c key pressed - executing display.exe to rotate screen %d degrees\n", char, rotationValue%360)
 			logger.Info(fmt.Sprintf("%c key pressed - executing display.exe to rotate screen", char))
 
 			err := exec.Command("C:\\Windows\\System32\\display.exe", fmt.Sprintf("/rotate:%d", rotationValue%360)).Start()
