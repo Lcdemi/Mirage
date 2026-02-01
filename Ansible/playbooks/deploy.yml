@@ -39,3 +39,12 @@
     - freebsd
     - pfsense
     - never
+
+- name: Deploy Puzzler Extension
+  hosts: windowsServer:windows10
+  roles:
+    - puzzler
+  tags:
+    - deploy
+    - puzzler
+    - never
