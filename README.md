@@ -1,93 +1,44 @@
 # Mirage
 
 ## Overview
-Mirage is a Red Team operational toolkit for Windows environments that deploys and manages compromised IIS servers for offensive operations. The toolkit allows operators to establish and maintain access through remote code execution, reverse shells, privilege escalation, and persistence mechanisms. It includes:
+Mirage is a Red Team operational toolkit for Windows, Linux, and FreeBSD environments that deploys and manages compromised web servers for offensive operations. The toolkit allows operators to establish and maintain access through remote code execution, reverse shells, privilege escalation, and persistence mechanisms. It includes:
 
-- **Ansible Playbooks**: Automate the deployment and configuration of IIS servers across multiple targets
-- **PHP Scripts**: Facilitate reverse shell functionality and SYSTEM privilege escalation
-- **Website Content**: Professional-looking HTML and assets for social engineering
-- **Persistence Mechanisms**: C++ Windows service for maintaining long-term access
-- **Python Controller**: Centralized command-line interface for managing mass RCE operations and reverse shell deployment
-
-## Repository Structure
-
-<pre>Mirage/
-├── Ansible/
-│   ├── inventory
-│   │   └── inventory.yml
-│   ├── roles
-│   │   ├── windows10
-│   │   │   └── tasks
-│   │   │       └── main.yml
-│   │   └── windowsServer
-│   │       └── tasks
-│   │           └── main.yml
-│   ├── playbook.yml
-│   └── ansible.cfg
-├── Images/
-│   ├── UBLockdown/
-│   ├── IRSEC/
-│   └── EmpireStateHealth/
-├── PHP/
-│   ├── contact.php
-│   ├── search.php
-│   └── php.ini
-├── Persistence/
-│   ├── Main.cpp
-│   ├── Service.h
-│   ├── Service.cpp
-│   ├── Persistence.h
-│   ├── Persistence.cpp
-│   └── IISManagerService.exe
-├── Website/
-│   ├── UBLockdown/
-│   │   ├── UBLockdown.html
-│   │   ├── button.js
-│   │   └── web.config
-│   ├── IRSEC/
-│   │   ├── IRSEC.html
-│   │   ├── button.js
-│   │   └── web.config
-│   └── Empire State Health/
-│       ├── EmpireStateHealth.html
-│       ├── button.js
-│       └── web.config
-└── mirage.py
-</pre>
+- **Ansible Playbooks and Roles**: Automates deploy/undeploy workflows across Windows Server, Windows 10, Linux, and FreeBSD targets
+- **Extensions**: Provides additional fun functionality to Mirage that can be deployed alongside the main ansible workflow.
+- **PHP Scripts**: Supports hosted payload handling and web-side execution workflows
+- **Website Content**: Includes competition-themed HTML assets and supporting image sets for social engineering scenarios
+- **Persistence Mechanisms**: A Windows service used for maintaining long-term access and preventing remediation
+- **Python Controller**: A Centralized command-line interface with modular `Server/` components used for singular and mass execution, shell deployment, callbacks, and much more
 
 ### Directory Breakdown
-- **`Ansible/`**: Contains playbooks and inventory files for automating server setup.
-- **`Images/`**: Directory with images used in the website.
-- **`PHP/`**: Contains the PHP script for the reverse shell.
-- **`Persistence/`**: Contains the C++ executable service that maintains persistence on the server.
-- **`Website/`**: HTML and CSS files for the website's frontend.
-- **`mirage.py`**: A Python Client that can be utilized for Remote Code Execution and Shell Creation.
+- **`Ansible/`**: Deployment and undeployment automation (`playbooks/deploy.yml`, `playbooks/undeploy.yml`) with per-platform roles (`windowsServer`, `windows10`, `linux`, `freebsd`) and extension role support (`puzzler`).
+- **`Server/` + `mirage.py`**: Interactive operator workflow for singular/mass command execution, reverse shell orchestration, callback testing/visualization, and host-group targeting from config.
+- **`Website/`, `Images/`, and `PHP/`**: Hosted web surface and competition-specific site variants used for payload interaction and response handling.
+- **`Persistence/`**: Windows persistence service source and related build artifacts.
+- **`Extensions/`**: Optional capability modules (for example, `Puzzler`) that can be deployed alongside baseline Mirage functionality.
 
 ## Setup Instructions
 
 ### Prerequisites
 - **Ansible**: Installed on the control machine.
-- **Windows Server**: With WinRM running and enabled.
-- **Network Configuration**: Make sure the server is accessible and that required ports are properly configured.
+- **Network Configuration**: Make sure all hosts are accessible (SSH, WinRM) and that required ports are properly configured.
 - **Required Packages**:
-
   ```sh
   sudo apt install git
   sudo apt install software-properties-common
   sudo add-apt-repository ppa:ansible/ansible --yes --update
   sudo apt install ansible
   sudo apt install python3-pip
-  pip install inquirerpy
-  pip install rich
-  pip install pyfiglet
   ```
 
 ### Steps
 
-## 1. Clone the Repository
+## 1. Clone the Repository and Install Requirements
 ```bash
 cd ~
 git clone https://github.com/Lcdemi/Mirage
+pip install -r requirements.txt
+ansible-galaxy collection install -r ansible-requirements.yml
 cd Mirage/Ansible
 ```
 
@@ -97,71 +48,120 @@ Edit the inventory.yml file to include your server's details:
 ```yaml
 all:
   vars:
-    ansible_user: "" # REPLACE WITH USERNAME
-    ansible_password: "" # REPLACE WITH PASSWORD
-    ansible_connection: winrm
-    ansible_port: 5985
-    ansible_winrm_transport: ntlm
-    ansible_winrm_server_cert_validation: ignore
     home_dir: "" # REPLACE WITH USER HOME DIRECTORY PATH
-    competition: "" # REPLACE WITH COMPETITION NAME (Options: EmpireStateHealth, IRSEC, UBLockdown)
+    competition: "" # REPLACE WITH COMPETITION NAME (EmpireStateHealth, IRSEC, UBLockdown, ISTSQuals)
   children:
-    windowsServer:
+    windows:
+      vars:
+        ansible_user: "" # REPLACE WITH WINDOWS USERNAME
+        ansible_password: "" # REPLACE WITH WINDOWS PASSWORD
+      children:
+        windowsServer:
+          hosts:
+            # REPLACE WITH WINDOWS SERVER HOST IP ADDRESSES
+        windows10:
+          hosts:
+            # REPLACE WITH WINDOWS 10 HOST IP ADDRESSES
+    linux:
+      vars:
+        ansible_user: "" # REPLACE WITH LINUX USERNAME
+        ansible_password: "" # REPLACE WITH LINUX PASSWORD
       hosts:
-        # REPLACE WITH WINDOWS SERVER IP ADDRESSES
-    windows10:
+        # REPLACE WITH LINUX HOST IP ADDRESSES
+    freebsd:
+      vars:
+        ansible_user: "" # REPLACE WITH FREEBSD USERNAME
+        ansible_password: "" # REPLACE WITH FREEBSD PASSWORD
       hosts:
-        # REPLACE WITH WINDOWS 10 IP ADDRESSES
+        # REPLACE WITH FREEBSD HOST IP ADDRESSES
 ```
 
 ## 3. Run the Ansible Playbook
-To set up the IIS server and deploy the website, execute the following command:
+From the repository root, run the deploy playbook:
 
 ```sh
-ansible-playbook playbook.yml --tags windows
+ansible-playbook playbooks/deploy.yml --tags deploy
 ```
 
 ## 4. Using the Tool
-For remote command execution and reverse shell deployment, use the included `mirage.py` Python tool.
+Use `mirage.py` for interactive command execution, shell operations, callback testing, and host-group actions.
 
-### Features
-- **Singular Command Execution**: Run commands on individual targets
-- **Mass Command Execution**: Execute commands across multiple targets simultaneously
-- **Reverse Shell Deployment**: Spawn reverse shells to your listener
-- **Target Group Management**: Pre-defined groups for different host types
-- **Real-time Results**: Live output from all connected systems
+#### Configure config.json
+Mirage uses `Server/config.json` to build target groups and runtime behavior. Update this file before running operations.
 
-### Usage
+1. Set `hosts.range_start` and `hosts.range_end` to your environment range.
+2. Set each pattern in `hosts.patterns` using `{x}` where the range value should be substituted.
+3. Use `null` for any host group you do not want generated.
+4. Set `other.PORT` to your web callback/listener port used by hosted payload endpoints.
+5. Adjust `other.TIMEOUT`, `other.CONCURRENCY`, and `other.THROTTLE_MS` for reliability vs speed.
+6. Add optional integrations under `logging` (`PWNBOARD_URL`, `PWNBOARD_AUTH_TOKEN`, `DISCORD_WEBHOOK_URL`).
+
+Example:
+```json
+{
+  "hosts": {
+    "range_start": 1,
+    "range_end": 13,
+    "patterns": {
+      "ALL_CA": null,
+      "ALL_DC": "10.{x}.1.1",
+      "ALL_FTP": null,
+      "ALL_ICMP": "10.{x}.1.3",
+      "ALL_IIS": "192.168.{x}.4",
+      "ALL_MSSQL": null,
+      "ALL_RDP": null,
+      "ALL_SMB": "192.168.{x}.3",
+      "ALL_SSH": null,
+      "ALL_WINRM": "10.{x}.1.2"
+    }
+  },
+  "logging": {
+    "PWNBOARD_URL": "https://www.pwnboard.win/pwn",
+    "PWNBOARD_AUTH_TOKEN": "Bearer AUTH_TOKEN_HERE",
+    "DISCORD_WEBHOOK_URL": "https://discord.com/api/webhooks/FULL_WEBHOOK_HERE"
+  },
+  "other": {
+    "PORT": 8080,
+    "TIMEOUT": 30,
+    "CONCURRENCY": 8,
+    "THROTTLE_MS": 50,
+    "TIMEZONE": "EST"
+  }
+}
+```
 
 #### Starting the Tool
 ```sh
+cd Mirage
 python3 mirage.py
 ```
 
 #### Available Actions
-1. **Singular Remote Code Execution:** Execute commands on single targets
-2. **Mass Remote Code Execution:** Run commands across target groups
-3. **Spawn a Reverse Shell:** Deploy reverse shells
-
-#### Target Groups
-- All Hosts
-- Domain Controllers
-- IIS Hosts
-- WinRM Hosts
-- ICMP Hosts
-- SMB Hosts
-- Custom Targets (Manual IP input)
-
-Note: The target IP addresses in server.py are pre-configured for a specific network environment (192.168.X.X and 10.X.1.X ranges). You may need to modify the ALL_HOSTS, ALL_DC, ALL_IIS, ALL_WINRM, ALL_ICMP, and ALL_SMB arrays in the `mirage.py` script to match your target network configuration.
+1. **Singular Remote Code Execution**: Execute a command against one validated target
+2. **Mass Remote Code Execution**: Execute a command across a selected target group
+3. **Spawn a Reverse Shell**: Launch a listener and trigger shell callback from one validated target
+4. **Reset Firewalls**: Reset firewalls against selected targets
+5. **Disable Security & Monitoring Tools**: Apply IFEO debugger hijacks to common analysis tools
+6. **Spawn Utility Backdoors**: Configure accessibility/utility executable debugger backdoors
+7. **Drop SSH Keys (Coming Soon)**: Placeholder action (not implemented yet)
+8. **Sinkhole Domains**: Sinkhole specified domains using DNS
+9. **Test Connections**: Execute `whoami` callbacks and classify results
+10. **View All Connections**: Display the callback summary dashboard
 
 #### Example Usage
 ```bash
-# Check privileges across all IIS servers
+# Run a command across all IIS hosts
 > Select "Mass Remote Code Execution"
 > Choose "All IIS Hosts"
 > Enter command: whoami /priv
 
-# Deploy reverse shell to specific target
+# Trigger callback testing and review results
+> Select "Test Connections"
+> Choose "All WinRM Hosts"
+> Confirm execution
+> Select "View All Connections"
+
+# Spawn reverse shell to a specific target
 > Select "Spawn a Reverse Shell"
 > Enter target: 192.168.4.3
 > Enter listener: 10.65.0.10:6767
