@@ -23,6 +23,7 @@ Mirage is a Red Team operational toolkit for Windows, Linux, and FreeBSD environ
 - **Ansible**: Installed on the control machine.
 - **Network Configuration**: Make sure all hosts are accessible (SSH, WinRM) and that required ports are properly configured.
 - **Required Packages**:
+
   ```sh
   sudo apt install git
   sudo apt install software-properties-common
@@ -77,10 +78,31 @@ all:
 ```
 
 ## 3. Run the Ansible Playbook
-From the repository root, run the deploy playbook:
+From the `Mirage/Ansible` directory, run the deploy playbook:
 
 ```sh
 ansible-playbook playbooks/deploy.yml --tags deploy
+```
+
+Tag options:
+- `deploy`: Runs all deploy tasks.
+- `windows`: Runs all Windows deploy tasks.
+- `windowsServer`: Runs only Windows Server deploy tasks.
+- `windows10`: Runs only Windows 10 deploy tasks.
+- `linux`: Runs only Linux deploy tasks.
+- `freebsd` or `pfsense`: Runs only FreeBSD/pfSense deploy tasks.
+- `puzzler`: Runs only the Puzzler extension deploy tasks.
+
+Examples:
+```sh
+# Deploy only Windows Server targets
+ansible-playbook playbooks/deploy.yml --tags windowsServer
+
+# Deploy only Linux targets
+ansible-playbook playbooks/deploy.yml --tags linux
+
+# Deploy all Mirage functionality
+ansible-playbook playbooks/deploy.yml --tags deploy,puzzler
 ```
 
 ## 4. Using the Tool
