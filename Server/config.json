@@ -1,18 +1,34 @@
 {
+    "_comment": "Example IP Scheme: 10.{x}.1.1 (x is replaced by range_start to range_end)",
     "hosts": {
         "range_start": 1,
         "range_end": 13,
-        "patterns": {
+        "windows_patterns": {
             "ALL_CA": null,
-            "ALL_DC": "10.{x}.1.1",
+            "ALL_DC": null,
             "ALL_FTP": null,
-            "ALL_ICMP": "10.{x}.1.3",
-            "ALL_IIS": "192.168.{x}.4",
+            "ALL_ICMP": null,
+            "ALL_IIS": null,
             "ALL_MSSQL": null,
             "ALL_RDP": null,
-            "ALL_SMB": "192.168.{x}.3",
+            "ALL_SMB": null,
             "ALL_SSH": null,
-            "ALL_WINRM": "10.{x}.1.2"
+            "ALL_WINRM": null
+        },
+        "linux_patterns": {
+            "ALL_APACHE": null,
+            "ALL_DOCKER": null,
+            "ALL_FTP": null,
+            "ALL_ICMP": null,
+            "ALL_MONGO": null,
+            "ALL_MYSQL": null,
+            "ALL_NGINX": null,
+            "ALL_POSTGRESQL": null,
+            "ALL_SAMBA": null,
+            "ALL_SSH": null
+        },
+        "freebsd_patterns": {
+            "ALL_ROUTER": null
         }
     },
     "logging": {
