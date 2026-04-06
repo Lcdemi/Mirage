@@ -1,4 +1,5 @@
 ---
+# Windows Server Only
 - name: Installs IIS Web Service Features
   win_feature:
     name:
@@ -6,7 +7,23 @@
       - Web-CGI
     state: present
     include_management_tools: yes
+  when: "'windowsServer' in group_names"
 
+# Windows Client Only
+- name: Installs IIS Web Service Optional Features
+  win_optional_feature:
+    name:
+      - IIS-WebServerRole
+      - IIS-WebServer
+      - IIS-CGI
+    state: present
+  when: "'windowsClient' in group_names"
+
+- name: Reload WebAdministration module without reboot
+  win_shell: "Import-Module WebAdministration"
+  when: "'windowsClient' in group_names"
+
+# Both Windows Server and Client
 - name: Download Visual C++ Redistributable
   win_get_url:
     url: "https://aka.ms/vs/17/release/vc_redist.x64.exe"

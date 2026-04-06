@@ -1,42 +1,63 @@
 ---
 - name: Undeploy Mirage Windows Server
   hosts: windowsServer
+  gather_facts: no
+  vars:
+    mirage_action: undeploy
   roles:
-    - undeploy
+    - windows
   tags:
     - undeploy
     - windows
     - windowsServer
     - never
 
-- name: Undeploy Mirage Windows 10
-  hosts: windows10
+- name: Undeploy Mirage Windows Client
+  hosts: windowsClient
+  gather_facts: no
+  vars:
+    mirage_action: undeploy
   roles:
-    - undeploy
+    - windows
   tags:
     - undeploy
     - windows
-    - windows10
+    - windowsClient
     - never
 
-# ISNT IMPLEMENTED YET
-# - name: Undeploy Mirage Linux
-#   hosts: linux
-#   become: yes
-#   roles:
-#     - undeploy
-#   tags:
-#     - undeploy
-#     - linux
-#     - never
+- name: Undeploy Mirage Linux
+  hosts: linux
+  become: yes
+  vars:
+    mirage_action: undeploy
+  roles:
+    - linux
+  tags:
+    - undeploy
+    - linux
+    - never
 
-# - name: Undeploy Mirage FreeBSD
-#   hosts: freebsd
-#   become: yes
-#   roles:
-#     - undeploy
-#   tags:
-#     - undeploy
-#     - freebsd
-#     - pfsense
-#     - never
+- name: Undeploy Mirage FreeBSD
+  hosts: freebsd
+  become: yes
+  vars:
+    mirage_action: undeploy
+  roles:
+    - freebsd
+  tags:
+    - undeploy
+    - freebsd
+    - pfsense
+    - never
+
+- name: Undeploy Puzzler Extension
+  hosts: windowsServer:windowsClient
+  gather_facts: no
+  vars:
+    mirage_action: undeploy
+  roles:
+    - puzzler
+  tags:
+    - undeploy
+    - puzzler
+    - never

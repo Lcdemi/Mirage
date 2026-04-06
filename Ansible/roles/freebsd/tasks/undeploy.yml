@@ -1,0 +1,40 @@
+---
+- name: Remove competition web root
+  file:
+    path: "/usr/local/www/{{ competition }}"
+    state: absent
+
+- name: Remove Port 8080 PFSense Rule (WAN)
+  pfsensible.core.pfsense_rule:
+    name: "Allow Competition Website"
+    interface: wan
+    state: absent
+
+- name: Remove Port 8080 PFSense Rule (LAN)
+  pfsensible.core.pfsense_rule:
+    name: "Allow Competition Website"
+    interface: lan
+    state: absent
+
+- name: Check for Mirage nginx.conf backup
+  stat:
+    path: "/usr/local/etc/nginx/nginx.conf.bak"
+  register: mirage_nginx_backup
+
+- name: Restore original nginx.conf
+  copy:
+    src: "/usr/local/etc/nginx/nginx.conf.bak"
+    dest: "/usr/local/etc/nginx/nginx.conf"
+    remote_src: yes
+  when: mirage_nginx_backup.stat.exists
+
+- name: Remove Mirage nginx.conf backup after restore
+  file:
+    path: "/usr/local/etc/nginx/nginx.conf.bak"
+    state: absent
+  when: mirage_nginx_backup.stat.exists
+
+- name: Restart Nginx service
+  service:
+    name: nginx
+    state: restarted

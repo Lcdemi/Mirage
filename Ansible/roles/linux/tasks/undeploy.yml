@@ -1,0 +1,61 @@
+---
+- name: Remove competition web root
+  file:
+    path: "/var/www/{{ competition }}"
+    state: absent
+
+- name: Remove Listen 8080 from Apache ports.conf (Debian/Ubuntu)
+  lineinfile:
+    path: /etc/apache2/ports.conf
+    line: 'Listen 8080'
+    state: absent
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Remove Mirage 8080 VirtualHost block (Debian/Ubuntu)
+  replace:
+    path: /etc/apache2/sites-available/000-default.conf
+    regexp: '(?s)<VirtualHost \*:8080>.*?</VirtualHost>\n?'
+    replace: ''
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Remove Listen 8080 from httpd.conf (RedHat/CentOS/Fedora/Arch)
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    line: 'Listen 8080'
+    state: absent
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Remove competition vhost file (RedHat/CentOS/Fedora/Arch)
+  file:
+    path: "/etc/httpd/conf.d/{{ competition }}.conf"
+    state: absent
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+
+- name: Remove UFW rule for port 8080 (Debian/Ubuntu)
+  ufw:
+    rule: allow
+    port: 8080
+    proto: tcp
+    delete: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Remove firewalld rule for port 8080 (RedHat/CentOS/Fedora/Arch)
+  firewalld:
+    port: 8080/tcp
+    permanent: yes
+    state: disabled
+    immediate: yes
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'
+  ignore_errors: yes
+
+- name: Restart Apache service (Debian/Ubuntu)
+  service:
+    name: apache2
+    state: restarted
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Restart Apache service (RedHat/CentOS/Fedora/Arch)
+  service:
+    name: httpd
+    state: restarted
+  when: ansible_facts['pkg_mgr'] == 'dnf' or ansible_facts['pkg_mgr'] == 'yum' or ansible_facts['pkg_mgr'] == 'pacman'

@@ -1,9 +1,9 @@
 ---
-- name: Validate mirage_action for FreeBSD role
+- name: Validate mirage_action for Windows role
   assert:
     that:
       - (mirage_action | default('deploy')) in ['deploy', 'undeploy']
     fail_msg: "Invalid mirage_action='{{ mirage_action | default('deploy') }}'. Use 'deploy' or 'undeploy'."
 
-- name: Run FreeBSD {{ mirage_action | default('deploy') }} tasks
+- name: Run Windows {{ mirage_action | default('deploy') }} tasks
   include_tasks: "{{ mirage_action | default('deploy') }}.yml"

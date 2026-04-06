@@ -1,22 +1,24 @@
 ---
 - name: Deploy Mirage Windows Server
   hosts: windowsServer
+  gather_facts: no
   roles:
-    - windowsServer
+    - windows
   tags:
     - deploy
     - windows
     - windowsServer
     - never
 
-- name: Deploy Mirage Windows 10
-  hosts: windows10
+- name: Deploy Mirage Windows Client
+  hosts: windowsClient
+  gather_facts: no
   roles:
-    - windows10
+    - windows
   tags:
     - deploy
     - windows
-    - windows10
+    - windowsClient
     - never
 
 - name: Deploy Mirage Linux
@@ -41,7 +43,8 @@
     - never
 
 - name: Deploy Puzzler Extension
-  hosts: windowsServer:windows10
+  hosts: windowsServer:windowsClient
+  gather_facts: no
   roles:
     - puzzler
   tags:

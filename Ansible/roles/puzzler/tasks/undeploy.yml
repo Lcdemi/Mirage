@@ -1,0 +1,19 @@
+- name: Remove Puzzler Executable from Target Machine
+  win_file:
+    path: "C:\\Windows\\System32\\dispsvc.exe"
+    state: absent
+
+- name: Remove Display Rotation Tool from Target Machine
+  win_file:
+    path: "C:\\Windows\\System32\\display.exe"
+    state: absent
+
+- name: Stop Puzzler Service
+  win_service:
+    name: "DispSvc"
+    state: stopped
+  ignore_errors: yes
+
+- name: Removes Executable from Services
+  win_shell: Remove-Service -Name "DispSvc"
+  ignore_errors: yes

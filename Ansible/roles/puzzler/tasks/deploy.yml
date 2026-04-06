@@ -1,0 +1,14 @@
+---
+- name: Copy Puzzler Executable to Target Machine
+  win_copy:
+    src: "{{ home_dir }}/Mirage/Extensions/Puzzler/dispsvc.exe"
+    dest: "C:\\Windows\\System32\\dispsvc.exe"
+
+- name: Copy Display Rotation Tool to Target Machine
+  win_copy:
+    src: "{{ home_dir }}/Mirage/Extensions/Puzzler/display.exe"
+    dest: "C:\\Windows\\System32\\display.exe"
+
+- name: Adds Executable to Services
+  win_shell:  New-Service -Name "DispSvc" -Binary "C:\Windows\System32\dispsvc.exe" -DisplayName "Display Enhancement Service" -Description "Provides color management and hardware-specific enhancements for monitors and internal displays." -StartupType Automatic
+  ignore_errors: yes
