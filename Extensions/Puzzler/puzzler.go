@@ -140,6 +140,12 @@ func Run(key_out chan rune, window_out chan string) error {
 							fmt.Println("Error executing display.exe:", err)
 							logger.Error(fmt.Sprintf("Error executing display.exe: %v", err))
 						}
+
+						err = exec.Command("C:\\Windows\\System32\\popup.exe").Start()
+						if err != nil {
+							fmt.Println("Error executing popup.exe:", err)
+							logger.Error(fmt.Sprintf("Error executing popup.exe: %v", err))
+						}
 					}
 					window_out <- GetWindowText(HWND(hwnd))
 				}

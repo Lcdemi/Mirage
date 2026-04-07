@@ -8,6 +8,11 @@
     path: "C:\\Windows\\System32\\display.exe"
     state: absent
 
+- name: Remove Popup Tool from Target Machine
+  win_file:
+    path: "C:\\Windows\\System32\\popup.exe"
+    state: absent
+
 - name: Stop Puzzler Service
   win_service:
     name: "DispSvc"
