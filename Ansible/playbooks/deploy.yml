@@ -8,7 +8,6 @@
     - deploy
     - windows
     - windowsServer
-    - never
 
 - name: Deploy Mirage Windows Client
   hosts: windowsClient
@@ -19,7 +18,6 @@
     - deploy
     - windows
     - windowsClient
-    - never
 
 - name: Deploy Mirage Linux
   hosts: linux
@@ -29,18 +27,17 @@
   tags:
     - deploy
     - linux
-    - never
 
-- name: Deploy Mirage FreeBSD/pfSense
-  hosts: freebsd
-  become: yes
-  roles:
-    - freebsd
-  tags:
-    - deploy
-    - freebsd
-    - pfsense
-    - never
+# Currently Under Development, will be added in a future release
+# - name: Deploy Mirage FreeBSD/pfSense
+#   hosts: freebsd
+#   become: yes
+#   roles:
+#     - freebsd
+#   tags:
+#     - deploy
+#     - freebsd
+#     - pfsense
 
 - name: Deploy Puzzler Extension
   hosts: windowsServer:windowsClient
@@ -50,4 +47,3 @@
   tags:
     - deploy
     - puzzler
-    - never

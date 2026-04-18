@@ -12,6 +12,7 @@ failed_results = []
 error_results = []
 
 SYSTEM_RE = re.compile(r"nt authority\\system", re.IGNORECASE)
+WWWDATA_RE = re.compile(r"www-data", re.IGNORECASE)
 
 console = Console()
 
@@ -213,6 +214,8 @@ def process_callbacks(results):
     for result in successful_results:
         response_text = str(result["response"])
         if SYSTEM_RE.search(response_text):
+            fwd_pwnboard(result["target"])
+        elif WWWDATA_RE.search(response_text):
             fwd_pwnboard(result["target"])
         else:
             unprivileged_results.append(result)

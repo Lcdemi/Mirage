@@ -6,7 +6,7 @@ from Server.config_loader import CONFIG
 # Disable HTTPS Warnings for Pwnboard
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def fwd_pwnboard(target, result):
+def fwd_pwnboard(target):
     from Server.callbacks import privileged_results
     
     # Set up JSON Request
